@@ -556,7 +556,6 @@ progress {
 
 .initialism {
     font-size: 0.875em;
-    text-transform: uppercase
 }
 
 .blockquote {
@@ -9071,9 +9070,6 @@ textarea.form-control-lg {
     text-transform: lowercase !important
 }
 
-.text-uppercase {
-    text-transform: uppercase !important
-}
 
 .text-capitalize {
     text-transform: capitalize !important
@@ -25901,11 +25897,6 @@ table.table.table-detaillist>tbody>tr>th {
     margin-right: 2px
 }
 
-#smartbanner .sb-info em {
-    font-style: normal;
-    text-transform: uppercase
-}
-
 #smartbanner .sb-button {
     position: absolute;
     right: 20px;
@@ -25919,7 +25910,6 @@ table.table.table-detaillist>tbody>tr>th {
     font-weight: bold;
     color: #6a6a6a;
     background: -webkit-linear-gradient(top, #efefef 0%, #dcdcdc 100%);
-    text-transform: uppercase;
     text-decoration: none;
     text-shadow: 0 1px 0 hsla(0,0%,100%,.8);
     border-radius: 3px;
