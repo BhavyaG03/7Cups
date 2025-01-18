@@ -15,12 +15,12 @@ app.use(express.json());
 // Socket.IO setup
 const io = socketIo(server, {
   cors: {
-    origin: 'http://localhost:5173', // Frontend URL
+    origin: 'https://calmify-y7tl.onrender.com', // Frontend URL
     methods: ['GET', 'POST']
   }
 });
 
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: 'https://calmify-y7tl.onrender.com' }));
 
 let usersInRoom = {};  // Store users by room name
 
