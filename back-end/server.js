@@ -2,61 +2,67 @@ const express = require('express');
 const http = require('http');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const { Server } = require('socket.io');
+const socketIo = require('socket.io');
 require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
 
-// ===== MIDDLEWARE =====
-app.use(cors());
+// Middleware
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
-// ===== SOCKET.IO SETUP =====
-const io = new Server(server, {
+// Socket.IO setup
+const io = socketIo(server, {
   cors: {
-    origin: '*', // Or list of allowed origins
-    methods: ['GET', 'POST'],
-  },
+    origin: 'http://localhost:5173', // Frontend URL
+    methods: ['GET', 'POST']
+  }
 });
 
-// Whenever a new client connects
+app.use(cors({ origin: 'http://localhost:5173' }));
+
+let usersInRoom = {};  // Store users by room name
+
+// When a new client connects
 io.on('connection', (socket) => {
-  console.log(`User connected: ${socket.id}`);
+  console.log('User connected:', socket.id);
 
-  // Listening for chat messages
-  socket.on('send_message', (data) => {
-    // Broadcast the message to all users in the room
-    io.to(data.room).emit('receive_message', data);
-  });
-
-  // Join a chat room
+  // Handle joining a room
   socket.on('join_room', (room) => {
-    socket.join(room);
+    socket.join(room);  // Join the specified room
     console.log(`User with ID: ${socket.id} joined room: ${room}`);
+    usersInRoom[room] = usersInRoom[room] || [];
+    usersInRoom[room].push(socket.id);
   });
 
+  // Handle receiving a message
+  socket.on('send_message', (msgData) => {
+    console.log('Message from user:', msgData);
+    io.to(msgData.room).emit('receive_message', msgData);  // Broadcast message to the same room
+  });
+
+  // Handle disconnect
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
+    // Remove user from rooms on disconnect
+    for (let room in usersInRoom) {
+      usersInRoom[room] = usersInRoom[room].filter(id => id !== socket.id);
+      if (usersInRoom[room].length === 0) {
+        delete usersInRoom[room];
+      }
+    }
   });
 });
 
-// ===== MONGO CONNECTION =====
+// MongoDB connection
 mongoose
-  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    console.log('MongoDB connected');
-  })
-  .catch((err) => console.log(err));
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.error(err));
 
-// ===== ROUTES =====
 const authRoutes = require('./routes/authRoutes');
-const forumRoutes = require('./routes/forumRoutes');
 app.use('/api/auth', authRoutes);
-app.use('/api/forum', forumRoutes);
 
-// Start the server
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

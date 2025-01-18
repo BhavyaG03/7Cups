@@ -1,7 +1,5 @@
 import React from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
-import '../styles.css'
-import "../header.css";
 import { FaCartShopping } from "react-icons/fa6";
 import { RiAccountCircleLine } from "react-icons/ri";
 import { BiSearchAlt } from "react-icons/bi";

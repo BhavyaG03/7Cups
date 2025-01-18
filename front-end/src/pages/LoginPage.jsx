@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 function LoginPage() {
+  const apiUrl=import.meta.env.VITE_API_URL
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
@@ -10,20 +12,20 @@ function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
+      const res = await axios.post(`${apiUrl}/api/auth/login`, {
         email,
         password,
       });
       localStorage.setItem('token', res.data.token);
       alert('Logged in successfully');
-      navigate('/chat');
+      navigate('/preview');
     } catch (err) {
       alert(err.response?.data?.message || 'Error logging in');
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-tr from-red-400 to-pink-300">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-tr from-gray-500 to-gray-700">
       <div className="flex flex-col items-center w-full max-w-4xl overflow-hidden bg-white rounded-lg shadow-lg md:flex-row">
         {/* Left Side with Image */}
         <div className="hidden w-1/2 md:block">
