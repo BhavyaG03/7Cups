@@ -3,7 +3,9 @@ const http = require('http');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const socketIo = require('socket.io');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const Message = require('./models/Message');
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
@@ -15,14 +17,13 @@ app.use(express.json());
 // Socket.IO setup
 const io = socketIo(server, {
   cors: {
-    origin: 'https://calmify-y7tl.onrender.com',
-    methods: ['GET', 'POST']
-  }
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST'],
+  },
 });
 
-app.use(cors({ origin: 'https://calmify-y7tl.onrender.com' }));
-
-let usersInRoom = {};  // Store users by room name
+// Track users in rooms
+let usersInRoom = {}; // Format: { roomName: [socket.id, ...] }
 
 // When a new client connects
 io.on('connection', (socket) => {
@@ -30,30 +31,69 @@ io.on('connection', (socket) => {
 
   // Handle joining a room
   socket.on('join_room', (room) => {
-    socket.join(room);  // Join the specified room
+    socket.join(room);
     console.log(`User with ID: ${socket.id} joined room: ${room}`);
+
+    // Track users in the room
     usersInRoom[room] = usersInRoom[room] || [];
     usersInRoom[room].push(socket.id);
+
+    // Optional: Notify other users in the room
+    io.to(room).emit('user_joined', { userId: socket.id });
   });
 
-  // Handle receiving a message
-  socket.on('send_message', (msgData) => {
-    console.log('Message from user:', msgData);
-    io.to(msgData.room).emit('receive_message', msgData);  // Broadcast message to the same room
+  // Handle sending a message
+  socket.on('send_message', async (msgData) => {
+    try {
+      // Save the message to the database
+      const newMessage = new Message({
+        room: msgData.room,
+        author: msgData.author,
+        message: msgData.message,
+        time: msgData.time,
+      });
+      await newMessage.save();
+
+      // Broadcast the message to the same room
+      io.to(msgData.room).emit('receive_message', {
+        room: msgData.room,
+        author: msgData.author,
+        message: msgData.message,
+        time: msgData.time,
+      });
+    } catch (error) {
+      console.error('Error saving message:', error);
+      socket.emit('error_message', { error: 'Failed to save the message' });
+    }
   });
 
   // Handle disconnect
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
-    // Remove user from rooms on disconnect
+
+    // Remove the user from the rooms they were in
     for (let room in usersInRoom) {
-      usersInRoom[room] = usersInRoom[room].filter(id => id !== socket.id);
+      usersInRoom[room] = usersInRoom[room].filter((id) => id !== socket.id);
       if (usersInRoom[room].length === 0) {
-        delete usersInRoom[room];
+        delete usersInRoom[room]; // Remove the room if no users are left
       }
     }
+
+    // Optional: Notify other users about the disconnect
+    io.emit('user_left', { userId: socket.id });
   });
 });
+app.get('/messages', async (req, res) => {
+  const { room } = req.query;
+  try {
+    const messages = await Message.find({ room }).sort({ createdAt: 1 });
+    res.json(messages);
+  } catch (err) {
+    console.error('Error fetching messages:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
 
 // MongoDB connection
 mongoose
@@ -61,6 +101,7 @@ mongoose
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.error(err));
 
+// Authentication routes
 const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
 

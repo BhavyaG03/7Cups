@@ -10,10 +10,27 @@ function ChatPage() {
   const [room, setRoom] = useState('general');  // Keep 'general' as default room
   const [message, setMessage] = useState('');
   const [messageList, setMessageList] = useState([]);
-  const [userId, setUserId] = useState(null);  // Optional: If you want dynamic user IDs
+  const [userId, setUserId] = useState(null);  // Unique ID for the session
+  const [username, setUsername] = useState('Anonymous'); // Username from token or default
 
   useEffect(() => {
-    // Join the 'general' room (or any other specific room you want all users to join)
+    // Generate a unique ID for this session
+    const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+    setUserId(uniqueId);
+
+    // Decode JWT to extract the username
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const base64Payload = token.split('.')[1]; // Extract the payload part
+        const decodedPayload = JSON.parse(atob(base64Payload)); // Decode Base64 and parse JSON
+        setUsername(decodedPayload?.username || 'Anonymous');
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
+    }
+
+    // Join the room
     socket.emit('join_room', room);
 
     const handleReceiveMessage = (data) => {
@@ -31,29 +48,16 @@ function ChatPage() {
     return () => {
       socket.off('receive_message', handleReceiveMessage);
     };
-  }, [room]);  // Only trigger the effect when the room changes (though it's static here)
+  }, [room]);
 
   const sendMessage = async () => {
     if (message.trim() !== '') {
-      const token = localStorage.getItem('token');
-      let username = 'Anonymous';
-
-      // Decode JWT to extract the username
-      if (token) {
-        try {
-          const base64Payload = token.split('.')[1]; // Extract the payload part
-          const decodedPayload = JSON.parse(atob(base64Payload)); // Decode Base64 and parse JSON
-          username = decodedPayload?.username || 'Anonymous';
-        } catch (error) {
-          console.error('Error decoding token:', error);
-        }
-      }
-
       const msgData = {
         room,
-        author: username,
+        author: username, // Username from JWT token
         message: message.trim(),
         time: `${new Date().getHours()}:${new Date().getMinutes()}`,
+        sessionId: userId, // Include unique session ID
       };
 
       // Send the message via socket
@@ -77,8 +81,8 @@ function ChatPage() {
         {/* Chat Messages Section */}
         <div className="p-4 mb-6 space-y-4 overflow-y-auto bg-gray-200 rounded-lg shadow-md h-96">
           {messageList.map((msg, i) => (
-            <div key={i} className={`flex ${msg.author === 'Anonymous' ? 'justify-start' : 'justify-end'} items-center`}>
-              <div className={`p-3 rounded-lg min-w-[400px] h-[112px] text-white shadow-lg ${msg.author === 'Anonymous' ? 'bg-blue-600' : 'bg-green-600'}`}>
+            <div key={i} className={`flex ${msg.sessionId === userId ? 'justify-end' : 'justify-start'} items-center`}>
+              <div className={`p-3 rounded-lg min-w-[400px] h-[112px] text-white shadow-lg ${msg.sessionId === userId ? 'bg-green-600' : 'bg-blue-600'}`}>
                 <p className="font-semibold">{msg.author}</p>
                 <p className="text-sm">{msg.message}</p>
                 <p className="text-xs justify-self-end">{msg.time}</p>
