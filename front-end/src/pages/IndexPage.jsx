@@ -33,6 +33,7 @@ const IndexPage = () => {
       <p className="text-white font-normal text-[16px]">Organizations</p>
       </span>
       <Link to="/login"  className="text-white font-normal text-[16px]">Login</Link>
+      <Link to="/register"  className="text-white font-normal text-[16px]">Sign-Up</Link>
     </div>
   </nav>
 </div>

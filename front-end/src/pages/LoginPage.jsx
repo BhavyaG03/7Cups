@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function LoginPage() {
   const apiUrl=import.meta.env.VITE_API_URL
@@ -98,9 +98,9 @@ function LoginPage() {
 
           <p className="mt-6 text-sm text-center text-gray-600">
             Don't have an account?{' '}
-            <a href="#" className="text-blue-600 hover:underline">
+            <Link to='/register' className="text-blue-600 hover:underline">
               Sign Up
-            </a>
+            </Link>
           </p>
         </div>
       </div>
