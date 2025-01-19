@@ -30,7 +30,7 @@ function LoginPage() {
         {/* Left Side with Image */}
         <div className="hidden w-1/2 md:block">
           <img
-            src="/download.png"
+            src="https://img.freepik.com/free-vector/computer-login-concept-illustration_114360-7892.jpg?semt=ais_hybrid"
             alt="Login Visual"
             className="object-cover w-full h-full"
           />

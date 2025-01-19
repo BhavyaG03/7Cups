@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
 
 function RegisterPage() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     const apiUrl=import.meta.env.VITE_API_URL
@@ -15,7 +17,8 @@ function RegisterPage() {
         email,
         password,
       });
-      alert(res.data.message);
+      alert("Registered successfully");
+      navigate('/login');
     } catch (err) {
       alert(err.response?.data?.message || 'Error registering');
     }
@@ -27,9 +30,9 @@ function RegisterPage() {
         {/* Left Side with Image (Optional) */}
         <div className="hidden w-1/2 md:block">
           <img
-            src="/download.png"
+            src="https://img.freepik.com/free-vector/mobile-login-concept-illustration_114360-135.jpg?semt=ais_hybrid"
             alt="Register Visual"
-            className="object-cover w-full h-full"
+            className="object-contain w-full h-full"
           />
         </div>
 
@@ -93,9 +96,9 @@ function RegisterPage() {
 
           <p className="mt-6 text-sm text-center text-gray-600">
             Already have an account?{' '}
-            <a href="/login" className="text-blue-600 hover:underline">
+            <Link to="/login" className="text-blue-600 hover:underline">
               Login
-            </a>
+            </Link>
           </p>
         </div>
       </div>
