@@ -32,8 +32,10 @@ const IndexPage = () => {
       <p className="text-white font-normal text-[16px]">Considering Therapy</p>
       <p className="text-white font-normal text-[16px]">Organizations</p>
       </span>
-      <Link to="/login"  className="text-white font-normal text-[16px]">Login</Link>
-      <Link to="/register"  className="text-white font-normal text-[16px]">Sign-Up</Link>
+      <div className="flex items-center gap-2">
+      <Link to="/login"  className="text-white font-medium text-[18px]">Login</Link>
+      <Link to="/register"  className="text-white font-medium ml-3 text-[18px]">Sign-Up</Link>
+      </div>
     </div>
   </nav>
 </div>
