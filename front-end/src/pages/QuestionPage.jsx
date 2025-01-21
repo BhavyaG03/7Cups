@@ -5,16 +5,16 @@ function QuestionPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const questions = [
     {
-      question: "What is your relationship status?",
-      options: ["Single", "In a Relationship", "Married", "Divorced"],
+      question: "What is your age?",
+      options: ["14-18", "19-21", "22-26", "27+"],
     },
     {
-      question: "Which country do you live in?",
-      options: ["USA", "Canada", "UK", "India"],
+      question: "What gender do you idetify with?",
+      options: ["Woman", "Man", "Prefer not to say"],
     },
     {
-      question: "Do you consider yourself to be religious or spiritual?",
-      options: ["Yes", "No", "Prefer not to say", "Spiritual but not religious"],
+      question: "What is the main issue you would like to address?",
+      options: ["Anxiety", "Depression", "Relationship Stress", "Social Anxiety","Loneliness","Family Stress"],
     },
   ];
   const navigate = useNavigate();
@@ -30,24 +30,24 @@ function QuestionPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-3xl font-bold mb-8">Help us get to know you</h1>
+      <h1 className="mb-8 text-3xl font-bold">Help us get to know you</h1>
 
-      <div className="w-96 bg-gray-200 rounded-full h-2 mb-8">
+      <div className="h-2 mb-8 bg-gray-200 rounded-full w-96">
         <div
-          className="bg-blue-500 h-full rounded-full transition-all duration-500 ease-in-out"
+          className="h-full transition-all duration-500 ease-in-out bg-blue-500 rounded-full"
           style={{ width: `${progressBarWidth}%` }}
         ></div>
       </div>
 
-      <div className="bg-white p-8 rounded-lg shadow-md w-96">
-        <h2 className="text-2xl font-semibold mb-4 text-center">
+      <div className="p-8 bg-white rounded-lg shadow-md w-96">
+        <h2 className="mb-4 text-2xl font-semibold text-center">
           {questions[currentQuestion].question}
         </h2>
         <div className="flex flex-col gap-4">
           {questions[currentQuestion].options.map((option, index) => (
             <button
               key={index}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700 focus:outline-none focus:shadow-outline"
               onClick={nextQuestion}
             >
               {option}

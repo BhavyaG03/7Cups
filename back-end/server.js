@@ -17,7 +17,7 @@ app.use(express.json());
 // Socket.IO setup
 const io = socketIo(server, {
   cors: {
-    origin: 'https://calmify-y7tl.onrender.com',
+    origin: 'https://calmify-backend.onrender.com',
     methods: ['GET', 'POST'],
   },
 });
