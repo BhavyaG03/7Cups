@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 
 // Initialize the socket connection
-const socket = io('http://localhost:5000');
+const socket = io('https://calmify-backend.onrender.com');
 
 function ChatPage() {
   const apiUrl = import.meta.env.VITE_API_URL;
