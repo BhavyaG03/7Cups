@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:5000', { autoConnect: false });
+const socket = io('https://calmify-backend.onrender.com', { autoConnect: false });
 
 function ChatPage() {
   const [room, setRoom] = useState('general');
@@ -71,7 +71,7 @@ function ChatPage() {
       <div className="relative flex flex-col w-full max-w-4xl p-6 space-y-8 bg-white shadow-lg bg-opacity-80 rounded-xl backdrop-blur-lg">
         <h2 className="text-4xl font-extrabold text-center text-gray-800">Chat Room: {room}</h2>
 
-        <div className="space-y-4 overflow-auto max-h-[300px]">
+        <div className="p-4 mb-6 space-y-4 overflow-y-auto bg-gray-200 rounded-lg shadow-md h-96">
           {messageList.map((msg, i) => (
             <div
               key={i}
