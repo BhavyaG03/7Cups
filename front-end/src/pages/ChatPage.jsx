@@ -1,88 +1,89 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 
-// Initialize the socket connection
-const socket = io('https://calmify-backend.onrender.com');
+const socket = io('http://localhost:5000', { autoConnect: false });
 
 function ChatPage() {
-  const apiUrl = import.meta.env.VITE_API_URL;
-
-  const [room, setRoom] = useState('general');  // Keep 'general' as default room
+  const [room, setRoom] = useState('general');
   const [message, setMessage] = useState('');
   const [messageList, setMessageList] = useState([]);
-  const [userId, setUserId] = useState(null);  // Unique ID for the session
-  const [username, setUsername] = useState('Anonymous'); // Username from token or default
+  const [username, setUsername] = useState('Anonymous');
 
   useEffect(() => {
-    // Generate a unique ID for this session
-    const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
-    setUserId(uniqueId);
-
-    // Decode JWT to extract the username
+    // Decode JWT to extract username
     const token = localStorage.getItem('token');
     if (token) {
       try {
         const base64Payload = token.split('.')[1]; // Extract the payload part
-        const decodedPayload = JSON.parse(atob(base64Payload)); // Decode Base64 and parse JSON
+        const decodedPayload = JSON.parse(atob(base64Payload));
         setUsername(decodedPayload?.username || 'Anonymous');
       } catch (error) {
         console.error('Error decoding token:', error);
       }
     }
 
-    // Join the room
+    // Connect to the socket and join the room
+    socket.connect();
+
     socket.emit('join_room', room);
 
     const handleReceiveMessage = (data) => {
-      setMessageList((list) =>
-        list.some((msg) => msg.time === data.time && msg.author === data.author)
-          ? list
-          : [...list, data]
-      );
+      // Avoid duplicate messages (check if it already exists in messageList)
+      setMessageList((list) => {
+        if (list.some((msg) => msg.time === data.time && msg.message === data.message)) {
+          return list;
+        }
+        return [...list, data];
+      });
     };
 
-    // Listen for messages
     socket.on('receive_message', handleReceiveMessage);
 
-    // Clean up the listener on unmount or room change
+    // Cleanup listeners and disconnect socket on component unmount
     return () => {
       socket.off('receive_message', handleReceiveMessage);
+      socket.disconnect();
     };
   }, [room]);
 
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (message.trim() !== '') {
       const msgData = {
         room,
-        author: username, // Username from JWT token
+        author: username,
         message: message.trim(),
-        time: `${new Date().getHours()}:${new Date().getMinutes()}`,
-        sessionId: userId, // Include unique session ID
+        time: `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`,
       };
 
-      // Send the message via socket
+      // Emit and update message list locally
       socket.emit('send_message', msgData);
-
-      // Add the message locally
-      setMessageList((list) => [...list, msgData]);
-
-      // Clear the input field
+      setMessageList((list) => [...list, { ...msgData, isLocal: true }]);
       setMessage('');
     }
   };
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen p-4 text-white bg-center bg-cover"
-         style={{ backgroundImage: 'url("/chat.jpeg")' }}>
+    <div
+      className="relative flex items-center justify-center min-h-screen p-4 text-white bg-center bg-cover"
+      style={{ backgroundImage: 'url("/chat.jpeg")' }}
+    >
       <div className="absolute inset-0 bg-black opacity-50"></div>
       <div className="relative flex flex-col w-full max-w-4xl p-6 space-y-8 bg-white shadow-lg bg-opacity-80 rounded-xl backdrop-blur-lg">
         <h2 className="text-4xl font-extrabold text-center text-gray-800">Chat Room: {room}</h2>
-        
-        {/* Chat Messages Section */}
-        <div className="p-4 mb-6 space-y-4 overflow-y-auto bg-gray-200 rounded-lg shadow-md h-96">
+
+        <div className="space-y-4 overflow-auto max-h-[300px]">
           {messageList.map((msg, i) => (
-            <div key={i} className={`flex ${msg.sessionId === userId ? 'justify-end' : 'justify-start'} items-center`}>
-              <div className={`p-3 rounded-lg min-w-[400px] h-[112px] text-white shadow-lg ${msg.sessionId === userId ? 'bg-green-600' : 'bg-blue-600'}`}>
+            <div
+              key={i}
+              className={`flex ${
+                msg.isLocal ? 'justify-end' : 'justify-start'
+              } items-center`}
+            >
+              <div
+                className={`p-3 rounded-lg min-w-[200px] text-white shadow-lg ${
+                  msg.isLocal ? 'bg-green-600' : 'bg-blue-600'
+                }`}
+              >
                 <p className="font-semibold">{msg.author}</p>
                 <p className="text-sm">{msg.message}</p>
                 <p className="text-xs justify-self-end">{msg.time}</p>
@@ -91,7 +92,6 @@ function ChatPage() {
           ))}
         </div>
 
-        {/* Message Input and Send Button */}
         <div className="flex space-x-4">
           <input
             type="text"
@@ -100,7 +100,6 @@ function ChatPage() {
             onChange={(e) => setMessage(e.target.value)}
             onKeyUp={(e) => {
               if (e.key === 'Enter') {
-                e.preventDefault();
                 sendMessage();
               }
             }}
