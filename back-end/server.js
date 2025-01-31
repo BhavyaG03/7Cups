@@ -17,7 +17,7 @@ app.use(express.json());
 // Socket.IO setup
 const io = socketIo(server, {
   cors: {
-    origin: 'https://calmify-y7tl.onrender.com',
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST'],
   },
 });
@@ -31,6 +31,13 @@ io.on('connection', (socket) => {
 
   // Handle joining a room
   socket.on('join_room', (room) => {
+    // Check if the room exists and if it's full
+    if (usersInRoom[room] && usersInRoom[room].length >= 2) {
+      socket.emit("room_full", { message: "This room is full. You cannot join." });
+      return;
+    }
+
+    // Ensure room exists before pushing socket.id
     socket.join(room);
     console.log(`User with ID: ${socket.id} joined room: ${room}`);
 
@@ -44,6 +51,12 @@ io.on('connection', (socket) => {
 
   // Handle sending a message
   socket.on('send_message', async (msgData) => {
+    // Prevent users from sending messages if they're not in the room
+    if (!usersInRoom[msgData.room] || !usersInRoom[msgData.room].includes(socket.id)) {
+      socket.emit('error_message', { error: 'You are not in this room to send a message.' });
+      return;
+    }
+
     try {
       // Save the message to the database
       const newMessage = new Message({
@@ -83,6 +96,7 @@ io.on('connection', (socket) => {
     io.emit('user_left', { userId: socket.id });
   });
 });
+
 app.get('/messages', async (req, res) => {
   const { room } = req.query;
   try {
@@ -93,7 +107,6 @@ app.get('/messages', async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 });
-
 
 // MongoDB connection
 mongoose
