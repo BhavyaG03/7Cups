@@ -9,6 +9,7 @@ function ChatPage() {
   const [message, setMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
   const [username, setUsername] = useState("Anonymous");
+  const [roomFull, setRoomFull] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -44,8 +45,9 @@ function ChatPage() {
       socket.on("receive_message", handleReceiveMessage);
       socket.on("room_full", (data) => {
         alert(data.message); // Show an alert if the room is full
+        setRoom(""); // Clear room state
+        setRoomFull(true); // Mark the room as full
       });
-    
 
       return () => {
         socket.emit("leave_room", room);
@@ -58,6 +60,7 @@ function ChatPage() {
   const joinRoom = () => {
     if (newRoom.trim() !== "") {
       setRoom(newRoom.trim());
+      setRoomFull(false); // Reset room full state when joining a new room
       setMessageList([]);
     }
   };
@@ -85,7 +88,7 @@ function ChatPage() {
       <div className="absolute inset-0 bg-black opacity-50"></div>
       <div className="relative flex flex-col w-full max-w-4xl p-6 space-y-8 bg-white shadow-lg bg-opacity-80 rounded-xl backdrop-blur-lg">
         <h2 className="text-4xl font-extrabold text-center text-gray-800">
-          Chat Room: {room || "None"}
+          {roomFull ? "Room Full" : `Chat Room: ${room || "None"}`}
         </h2>
 
         {/* Room Input */}
