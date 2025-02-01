@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:5000", { autoConnect: false });
+const socket = io("https://calmify-backend.onrender.com", { autoConnect: false });
 
 function ChatPage() {
   const [room, setRoom] = useState("");
