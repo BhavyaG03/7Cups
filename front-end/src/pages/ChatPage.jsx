@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 
-const socket = io("https://calmify-backend.onrender.com", { autoConnect: false });
+const socket = io(`${import.meta.env.VITE_API_URL}`, { autoConnect: false });
 
 function ChatPage() {
   const [room, setRoom] = useState("");

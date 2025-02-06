@@ -13,11 +13,11 @@ const server = http.createServer(app);
 // Middleware
 app.use(cors({ origin: '*' }));
 app.use(express.json());
-
+const client_url=process.env.CLIENT_URL
 // Socket.IO setup
 const io = socketIo(server, {
   cors: {
-    origin: 'https://calmify-y7tl.onrender.com',
+    origin: `${client_url}`,
     methods: ['GET', 'POST'],
   },
 });

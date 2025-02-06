@@ -6,18 +6,20 @@ function RegisterPage() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('user'); // Default role
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
-    const apiUrl=import.meta.env.VITE_API_URL
+    const apiUrl = import.meta.env.VITE_API_URL;
     e.preventDefault();
     try {
-      const res = await axios.post(`${apiUrl}/api/auth/register`, {
+      await axios.post(`${apiUrl}/api/auth/register`, {
         username,
         email,
         password,
+        role, // Include role in request
       });
-      alert("Registered successfully");
+      alert('Registered successfully');
       navigate('/login');
     } catch (err) {
       alert(err.response?.data?.message || 'Error registering');
@@ -39,9 +41,7 @@ function RegisterPage() {
         {/* Right Side with Register Form */}
         <div className="w-full p-8 md:w-1/2">
           <h2 className="mb-6 text-3xl font-bold text-center text-gray-800">Create an Account</h2>
-          <p className="mb-8 text-center text-gray-600">
-            Register to get started with our platform.
-          </p>
+          <p className="mb-8 text-center text-gray-600">Register to get started with our platform.</p>
 
           <form onSubmit={handleRegister} className="space-y-6">
             <div>
@@ -84,6 +84,22 @@ function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="block w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
               />
+            </div>
+
+            {/* Role Selection */}
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                Role
+              </label>
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="block w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="user">User</option>
+                <option value="listener">Listener</option>
+              </select>
             </div>
 
             <button
