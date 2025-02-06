@@ -6,6 +6,8 @@ import ChatPage from './pages/ChatPage';
 import ForumPage from './pages/ForumPage';
 import IndexPage from './pages/IndexPage';
 import QuestionPage from './pages/QuestionPage';
+import UserDashboard from './pages/UserDashboard';
+import ListenerDashboard from './pages/ListenerDashboard';
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/forum" element={<ForumPage />} />
+        <Route path="/user/dashboard" element={<UserDashboard />} />
+        <Route path="/listener/dashboard" element={<ListenerDashboard />} />
         <Route path="/preview" element={<QuestionPage />} />
       </Routes>
     </BrowserRouter>
