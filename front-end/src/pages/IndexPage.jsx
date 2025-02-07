@@ -10,9 +10,6 @@ import { Link } from 'react-router-dom';
 
 
 const IndexPage = () => {
-  const updateLocale = (locale) => {
-    console.log(`Locale updated to: ${locale}`);
-  };
 
   return (
     <div className="flex flex-col items-start justify-start gap-3 pt-0 bg-reset bg-body navbar-main-transparent">
@@ -22,7 +19,7 @@ const IndexPage = () => {
       <span className="gap-5 navbar-brand d-flex">
         <img
           src="//d37v7cqg82mgxu.cloudfront.net/img/active-listeners-therapy.svg"
-          alt="7 Cups Online Therapy and Free Counseling"
+          alt=""
           height="30"
           width="36"
         />
@@ -104,13 +101,12 @@ const IndexPage = () => {
           style={{ width: "20px", height: "67.5px" }}
         />
       </div>
-
       <h1 className="w-full mb-0 fw-bold">
         Need someone to talk to? <br />
         Our counselors and listeners are standing by.
       </h1>
       <p className="col-10 col-sm-9 col-md-6">
-        7 Cups connects you to caring listeners for free emotional support.
+        Calmify connects you to caring listeners for free emotional support.
       </p>
       <div
         className="d-flex flex-column align-items-center"
@@ -142,7 +138,7 @@ const IndexPage = () => {
           <div className="col-10 col-sm-11 col-md-12">
             <h2 className="mb-0 fw-bold fs-4 mb-md-1">Free 24/7 Chat</h2>
             <p>
-              7 Cups connects you to caring listeners for free emotional
+              Calmify connects you to caring listeners for free emotional
               support.
             </p>
           </div>

@@ -21,6 +21,12 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "listener"],
       required:true
     },
+    status: {
+      type: String,
+      enum: ["active", "busy", "offline"],
+      default:"active",
+      required:true
+    },
   },
   { timestamps: true }
 );
