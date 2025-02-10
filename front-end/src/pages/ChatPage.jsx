@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
+import axios from "axios";
+import { useSelector } from "react-redux";
 
 const socket = io(`${import.meta.env.VITE_API_URL}`, { autoConnect: false });
 
 function ChatPage() {
   const [room, setRoom] = useState("");
-  const [newRoom, setNewRoom] = useState("");
   const [message, setMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
   const [username, setUsername] = useState("Anonymous");
   const [roomFull, setRoomFull] = useState(false);
+  const [role, setRole] = useState("");
+
+  const user = useSelector((state) => state.user.user);
+  const id = user.user.id;
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const base64Payload = token.split(".")[1]; 
+        const base64Payload = token.split(".")[1];
         const decodedPayload = JSON.parse(atob(base64Payload));
         setUsername(decodedPayload?.username || "Anonymous");
       } catch (error) {
@@ -28,6 +33,30 @@ function ChatPage() {
     return () => {
       socket.disconnect();
     };
+  }, []);
+
+  // Fetch user details including room_id
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/users/${id}`
+        );
+
+        const userData = response.data;
+        if (userData.role === "listener" && userData.room_id) {
+          setRoom(userData.room_id);
+          setRole("listener");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
   useEffect(() => {
@@ -44,9 +73,9 @@ function ChatPage() {
 
       socket.on("receive_message", handleReceiveMessage);
       socket.on("room_full", (data) => {
-        alert(data.message); // Show an alert if the room is full
-        setRoom(""); // Clear room state
-        setRoomFull(true); // Mark the room as full
+        alert(data.message);
+        setRoom("");
+        setRoomFull(true);
       });
 
       return () => {
@@ -56,14 +85,6 @@ function ChatPage() {
       };
     }
   }, [room]);
-
-  const joinRoom = () => {
-    if (newRoom.trim() !== "") {
-      setRoom(newRoom.trim());
-      setRoomFull(false); // Reset room full state when joining a new room
-      setMessageList([]);
-    }
-  };
 
   const sendMessage = () => {
     if (message.trim() !== "" && room) {
@@ -90,23 +111,6 @@ function ChatPage() {
         <h2 className="text-4xl font-extrabold text-center text-gray-800">
           {roomFull ? "Room Full" : `Chat Room: ${room || "None"}`}
         </h2>
-
-        {/* Room Input */}
-        <div className="flex space-x-4">
-          <input
-            type="text"
-            placeholder="Enter room name..."
-            value={newRoom}
-            onChange={(e) => setNewRoom(e.target.value)}
-            className="flex-1 px-4 py-3 text-black border border-gray-300 rounded-lg focus:outline-none"
-          />
-          <button
-            onClick={joinRoom}
-            className="px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-          >
-            Join Room
-          </button>
-        </div>
 
         {/* Chat Messages */}
         <div className="p-4 mb-6 space-y-4 overflow-y-auto bg-gray-200 rounded-lg shadow-md h-96">

@@ -1,28 +1,40 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../redux/userSlice";
+
 
 function LoginPage() {
   const apiUrl=import.meta.env.VITE_API_URL
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${apiUrl}/api/auth/login`, {
-        email,
-        password,
-      });
-      localStorage.setItem('token', res.data.token);
-      alert('Logged in successfully');
-      navigate('/preview');
+      const res = await axios.post(`${apiUrl}/api/users/login`, { email, password });
+  
+      // Save user data to Redux
+      dispatch(loginSuccess(res.data));
+  
+      // Navigate based on user role
+      if (res.data.role === "listener") {
+        navigate("/listener/dashboard");
+      } else if (res.data.role === "user") {
+        navigate("/user/dashboard");
+      } else {
+        navigate("/preview");
+      }
+  
+      alert("Logged in successfully");
     } catch (err) {
-      alert(err.response?.data?.message || 'Error logging in');
+      alert(err.response?.data?.message || "Error logging in");
     }
   };
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-tr from-gray-500 to-gray-700">

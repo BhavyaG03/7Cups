@@ -16,6 +16,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    gender: {
+      type: String,
+      required: true,
+    },
+    age: {
+      type: Number,
+      required: true,
+    },
     role: {
       type: String,
       enum: ["user", "listener"],
@@ -27,6 +35,10 @@ const userSchema = new mongoose.Schema(
       default:"active",
       required:true
     },
+    room_id:{
+      type: String,
+      default:null
+    }
   },
   { timestamps: true }
 );

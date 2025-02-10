@@ -5,7 +5,7 @@ const User = require('../models/User');
 // REGISTER
 exports.register = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
+    const { username, email, password, role,gender,age } = req.body;
     const status="active";
 
     const existingUser = await User.findOne({ email });
@@ -21,7 +21,10 @@ exports.register = async (req, res) => {
       email,
       password: hashedPassword,
       role: role || "user",
-      status:status
+      status:status,
+      gender,
+      age,
+      room_id:null
     });
 
     await newUser.save();
@@ -52,16 +55,21 @@ exports.login = async (req, res) => {
       process.env.JWT_SECRET || 'secretkey',
       { expiresIn: '1d' }
     );
-
     return res.status(200).json({
       token,
+      role: user.role,
       user: {
         id: user._id,
         username: user.username,
         email: user.email,
         role: user.role,
+        status: user.status,
+        gender: user.gender,
+        age: user.age,
+        room_id:user.room_id
       },
     });
+    
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });
@@ -102,3 +110,30 @@ exports.deleteAllUsers = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+exports.getAll= async (req, res) => {
+  try {
+    const filters = {};
+    
+    if (req.query.role) filters.role = req.query.role;
+    if (req.query.status) filters.status = req.query.status;
+    if (req.query.age) filters.age = req.query.age;
+    
+    const users = await User.find(filters);
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+exports.getById= async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
