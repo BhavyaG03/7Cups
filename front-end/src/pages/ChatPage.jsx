@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 
 const socket = io(`${import.meta.env.VITE_API_URL}`, { autoConnect: false });
 
@@ -11,10 +12,15 @@ function ChatPage() {
   const [messageList, setMessageList] = useState([]);
   const [username, setUsername] = useState("Anonymous");
   const [roomFull, setRoomFull] = useState(false);
-  const [role, setRole] = useState("");
 
   const user = useSelector((state) => state.user.user);
-  const id = user.user.id;
+  const id = user?.user?.id;
+  const role=user.role
+  const userName=user.user.username
+  console.log(role)
+  
+
+  const location = useLocation();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -22,42 +28,41 @@ function ChatPage() {
       try {
         const base64Payload = token.split(".")[1];
         const decodedPayload = JSON.parse(atob(base64Payload));
-        setUsername(decodedPayload?.username || "Anonymous");
+        console.log("Decoded Username:", decodedPayload?.username); // Debugging Log
+        setUsername(decodedPayload?.username || `User-${Math.floor(Math.random() * 1000)}`);
       } catch (error) {
         console.error("Error decoding token:", error);
       }
     }
 
     socket.connect();
-
     return () => {
       socket.disconnect();
     };
   }, []);
 
-  // Fetch user details including room_id
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
+    if (role==="user") {
+      setRoom(location.state.room_id);
+    } else {
+      const fetchUserData = async () => {
+        try {
+          const token=user.token
+          if (!token) return;
 
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/users/${id}`
-        );
-
-        const userData = response.data;
-        if (userData.role === "listener" && userData.room_id) {
-          setRoom(userData.room_id);
-          setRole("listener");
+          const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/${id}`);
+          const userData = response.data;
+          if (userData.role === "listener" && userData.room_id) {
+            setRoom(userData.room_id);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
         }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
+      };
 
-    fetchUserData();
-  }, []);
+      fetchUserData();
+    }
+  }, [location, id,role]);
 
   useEffect(() => {
     if (room) {
@@ -65,9 +70,7 @@ function ChatPage() {
 
       const handleReceiveMessage = (data) => {
         setMessageList((list) =>
-          list.some((msg) => msg.time === data.time && msg.message === data.message)
-            ? list
-            : [...list, data]
+          list.some((msg) => msg.time === data.time && msg.message === data.message) ? list : [...list, data]
         );
       };
 
@@ -88,13 +91,8 @@ function ChatPage() {
 
   const sendMessage = () => {
     if (message.trim() !== "" && room) {
-      const msgData = {
-        room,
-        author: username,
-        message: message.trim(),
-        time: new Date().toLocaleTimeString(),
-      };
-
+      console.log("Sending message from:", userName); // Debugging Log
+      const msgData = { room, author: userName, message: message.trim(), time: new Date().toLocaleTimeString() };
       socket.emit("send_message", msgData);
       setMessageList((list) => [...list, { ...msgData, isLocal: true }]);
       setMessage("");
