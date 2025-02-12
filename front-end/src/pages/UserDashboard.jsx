@@ -6,12 +6,28 @@ const UserDashboard = () => {
   const user = useSelector((state) => state.user.user);
   console.log(user)
   console.log("user id",user.user.id)
+  const id=user.user.id;
+  const apiUrl=import.meta.env.VITE_API_URL;
   
   const articleImages = [
     "/blog.png",
     "/blog1.jpg",
     "/blog2.png",
   ];
+  const handleLogout = async () => {
+    if (id) {
+      try {
+        await fetch(`${apiUrl}/api/users/logout`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+        console.log("logged out")
+      } catch (error) {
+        console.error("Error logging out:", error);
+      }
+    }
+  };
 
   return (
     <div className="flex items-center justify-between min-h-screen p-10 bg-gray-100">
@@ -25,6 +41,10 @@ const UserDashboard = () => {
             Start Chat
           </button>
         </Link>
+        <button onClick={handleLogout} className="px-6 py-3 mt-12 text-lg font-semibold text-white transition-all bg-blue-600 rounded-lg shadow-lg hover:bg-blue-700">
+            Logout
+          </button>
+
       </div>
 
       {/* Right Sidebar */}

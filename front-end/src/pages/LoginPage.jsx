@@ -19,6 +19,7 @@ function LoginPage() {
   
       // Save user data to Redux
       dispatch(loginSuccess(res.data));
+      await axios.put(`${apiUrl}/api/users/edit/${res.data.user.id}`, { status: "active" });
   
       // Navigate based on user role
       if (res.data.role === "listener") {
