@@ -7,6 +7,7 @@ exports.register = async (req, res) => {
   try {
     const { username, email, password, role,gender,age } = req.body;
     const status="active";
+    const rating=4;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -24,7 +25,8 @@ exports.register = async (req, res) => {
       status:status,
       gender,
       age,
-      room_id:null
+      room_id:null,
+      rating:rating
     });
 
     await newUser.save();
@@ -66,7 +68,8 @@ exports.login = async (req, res) => {
         status: user.status,
         gender: user.gender,
         age: user.age,
-        room_id:user.room_id
+        room_id:user.room_id,
+        rating:user.rating
       },
     });
     

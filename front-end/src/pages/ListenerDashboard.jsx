@@ -27,9 +27,12 @@ const ListenerDashboard = () => {
     try {
       const res = await axios.put(`${apiUrl}/api/users/edit/${user.user.id}`, { room_id: roomId });
   
-      console.log("API Response:", res.data); // Debug API response
-  
-      // Ensure room_id is updated in Redux
+      console.log("API Response:", res.data); 
+      await axios.post(`${apiUrl}/api/chats`, {
+                room_id: roomId,
+                listener_id:user.user.id
+              });
+      console.log("Listener stored")
       dispatch(setUser({ ...user, user: { ...user.user, room_id: roomId } }));
   
       console.log("Updated Redux State:", { ...user, user: { ...user.user, room_id: roomId } });

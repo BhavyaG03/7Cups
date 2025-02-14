@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
+
 
 function QuestionPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showListeners, setShowListeners] = useState(false);
   const [listeners, setListeners] = useState([]);
+  const user = useSelector((state) => state.user.user);
+  const id = user?.user?.id;
 
   const questions = [
     { question: "What is your age?", options: ["14-18", "19-21", "22-26", "27+"] },
@@ -20,7 +24,7 @@ function QuestionPage() {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      fetchListeners();  // Fetch listeners after the last question
+      fetchListeners();
     }
   };
 
@@ -29,10 +33,27 @@ function QuestionPage() {
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/users?status=active&role=listener`
       );
-      setListeners(response.data);  // Ensure you are setting response.data, not the full response object
+      setListeners(response.data);
       setShowListeners(true);
     } catch (error) {
       console.error("Error fetching listeners:", error);
+    }
+  };
+
+  const handleJoinChat = async (listenerRoomId) => {
+    try {
+      if (!id) {
+        console.error("User ID not found.");
+        return;
+      }
+      console.log("listener id",listenerRoomId)
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/chats/${listenerRoomId}`, { 
+        user_id: id 
+      });      
+
+      navigate(`/chat`, { state: { room_id: listenerRoomId } });
+    } catch (error) {
+      console.error("Error updating user room:", error);
     }
   };
 
@@ -62,11 +83,11 @@ function QuestionPage() {
           <h2 className="mb-4 text-2xl font-semibold text-center">Available Listeners</h2>
           <ul>
             {listeners.map((listener) => (
-              <li key={listener.room_id} className="flex justify-between p-3 bg-gray-200 mb-2 rounded-lg">
+              <li key={listener.room_id} className="flex justify-between p-3 mb-2 bg-gray-200 rounded-lg">
                 <span>{listener.username}</span>
                 <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded"
-                  onClick={() => navigate(`/chat`, { state: { room_id: listener.room_id } })}
+                  className="px-4 py-2 text-white bg-blue-600 rounded"
+                  onClick={() => handleJoinChat(listener.room_id)}
                 >
                   Join Chat
                 </button>

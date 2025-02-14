@@ -98,8 +98,13 @@ function ChatPage() {
       setMessage("");
     }
   };
-  const endChat=()=>{
-    alert("these do not work currently :)")
+  const endChat=async()=>{
+    try {
+      const response= await axios.put(`${import.meta.env.VITE_API_URL}/api/chats/${room}`);
+      console.log("id for both",response.data)
+    } catch (error) {
+      console.error("error getting ids",error)
+    }
   }
   const report= () => {
     alert("these do not work currently :)")
