@@ -4,23 +4,24 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../redux/userSlice";
 
-
 function LoginPage() {
-  const apiUrl=import.meta.env.VITE_API_URL
+  const apiUrl = import.meta.env.VITE_API_URL;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false); // ⬅️ Loading state
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true); // ⬅️ Show loading spinner
     try {
       const res = await axios.post(`${apiUrl}/api/users/login`, { email, password });
-  
+
       // Save user data to Redux
       dispatch(loginSuccess(res.data));
       await axios.put(`${apiUrl}/api/users/edit/${res.data.user.id}`, { status: "active" });
-  
+
       // Navigate based on user role
       if (res.data.role === "listener") {
         navigate("/listener/dashboard");
@@ -29,13 +30,14 @@ function LoginPage() {
       } else {
         navigate("/preview");
       }
-  
+
       alert("Logged in successfully");
     } catch (err) {
       alert(err.response?.data?.message || "Error logging in");
+    } finally {
+      setLoading(false); // ⬅️ Hide loading spinner
     }
   };
-  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-tr from-gray-500 to-gray-700">
@@ -103,9 +105,14 @@ function LoginPage() {
 
             <button
               type="submit"
-              className="w-full py-2 text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex items-center justify-center w-full py-2 text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={loading} // ⬅️ Disable button when loading
             >
-              Login
+              {loading ? (
+                <div className="w-6 h-6 border-4 border-white rounded-full border-t-transparent animate-spin"></div>
+              ) : (
+                "Login"
+              )}
             </button>
           </form>
 

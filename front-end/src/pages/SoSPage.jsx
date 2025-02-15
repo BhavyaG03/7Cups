@@ -2,7 +2,7 @@ import React from 'react'
 
 const SoSPage = () => {
   return (
-    <div>SoSPage</div>
+    <div className='text-3xl font-semibold text-black'>SOS Page</div>
   )
 }
 
