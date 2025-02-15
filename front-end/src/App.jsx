@@ -12,6 +12,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import ReportPage from './pages/ReportPage';
 import ReviewPage from './pages/ReviewPage';
+import SoSPage from './pages/SoSPage';
 
 
 
@@ -57,6 +58,7 @@ function App() {
         <Route path="/preview" element={<QuestionPage />} />
         <Route path="/report" element={<ReportPage />} />
         <Route path="/review" element={<ReviewPage />} />
+        <Route path="/pro/therapy" element={<SoSPage />} />
       </Routes>
     </BrowserRouter>
   );

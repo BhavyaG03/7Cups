@@ -112,6 +112,31 @@ function ChatPage() {
       }
       navigate("/report", { state: { reported_by, room_id, reported_person } });
   }
+  const sos = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/chats/${room}`);
+      const { room_id, listener_id, user_id } = response.data;
+  
+      console.log("SOS triggered, emitting event:", { room_id, listener_id, user_id });
+        socket.emit("sos", { room_id, listener_id, user_id });
+        if (role === "user") {
+        navigate("/pro/therapy");
+      }
+    } catch (error) {
+      console.error("Error triggering SOS:", error);
+    }
+  };
+  
+  useEffect(() => {
+    socket.on("sos", ({ room_id, listener_id, user_id }) => {
+      console.log("Received SOS event, redirecting user...", { room_id, listener_id, user_id });
+        if (role === "user") {
+        navigate("/pro/therapy");
+      }
+    });
+  
+    return () => socket.off("sos");
+  }, []);
   
 
   return (
@@ -163,6 +188,12 @@ function ChatPage() {
             End Chat
           </button>
           </div>
+          <button
+            onClick={sos}
+            className={`${role === "listener" ? "px-6 py-2 text-white bg-red-900 rounded-full w-28 hover:bg-red-500" : "hidden"}`}
+            >
+            SOS
+          </button>
         </div>
       </div>
     </div>

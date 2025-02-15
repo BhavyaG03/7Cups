@@ -56,6 +56,16 @@ const initSocket = (server) => {
       }
     });
 
+    // ✅ Handle SOS alert
+    socket.on("sos", ({ room_id, listener_id, user_id }) => {
+      console.log(`SOS triggered in room: ${room_id} by user ${user_id || listener_id}`);
+
+      if (usersInRoom[room_id]) {
+        // Broadcast SOS event to the room
+        io.to(room_id).emit("sos", { room_id, listener_id, user_id });
+      }
+    });
+
     // ✅ Handle chat end and notify both users
     socket.on("chatEnded", ({ room_id, listener_id, user_id }) => {
       console.log(`Chat ended, broadcasting to room: ${room_id}`);
