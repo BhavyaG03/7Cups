@@ -97,6 +97,21 @@ function ChatPage() {
   
     return () => socket.off("chatEnded");
   }, []);
+  const report =async () => {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/chats/${room}`);
+      const { room_id, listener_id, user_id } = response.data;
+      let reported_person="";
+      let reported_by="";
+      if (role==="user") {
+        reported_person=listener_id;
+        reported_by=user_id;
+      }
+      else if(role==="listener"){
+        reported_person=user_id;
+        reported_by=listener_id;
+      }
+      navigate("/report", { state: { reported_by, room_id, reported_person } });
+  }
   
 
   return (
@@ -123,8 +138,7 @@ function ChatPage() {
             </div>
           ))}
         </div>
-
-        <div className="flex w-full h-[55px] space-x-4">
+        <div className="flex items-end w-full h-[55px] space-x-4">
           <input
             type="text"
             placeholder="Type your message..."
@@ -135,12 +149,20 @@ function ChatPage() {
             }}
             className="flex-1 px-4 py-3 text-black border border-gray-300 rounded-full focus:outline-none"
           />
-          <button onClick={sendMessage} className="px-6 py-2 text-white bg-blue-600 rounded-full w-28 hover:bg-blue-700">
+          <button onClick={sendMessage} className="h-10 px-6 py-2 text-white bg-blue-600 rounded-full w-28 hover:bg-blue-700">
             Send
+          </button>
+          <div className="flex flex-col items-start justify-start gap-2">
+          <button
+            onClick={report}
+            className="px-6 py-2 text-white bg-red-600 rounded-full w-28 hover:bg-red-800"
+          >
+            Report
           </button>
           <button onClick={endChat} className="px-6 py-2 text-white bg-yellow-400 rounded-full w-28 hover:bg-yellow-500">
             End Chat
           </button>
+          </div>
         </div>
       </div>
     </div>

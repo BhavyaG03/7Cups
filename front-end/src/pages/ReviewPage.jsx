@@ -11,7 +11,7 @@ const ReviewPage = () => {
   const { listener_id, user_id, room_id } = location.state;
 
   const [experience, setExperience] = useState(5);
-  const [helpful, setHelpful] = useState("Helpful");
+  const [helpful, setHelpful] = useState(true);
   const [reason, setReason] = useState("");
 
   const [speakerBehavior, setSpeakerBehavior] = useState("Genuine");

@@ -7,7 +7,7 @@ const snapRoutes = require("./routes/snapRoutes");
 const roomRoutes =require("./routes/roomRoutes");
 const userFeedbackRoutes=require("./routes/userFeedbackRoutes");
 const listenerFeedbackRoutes=require("./routes/listenerFeedbackroutes");
-
+const reportRoutes = require("./routes/reportRoutes");
 
 const app = express();
 app.use(cors({ origin: "*" }));
@@ -17,6 +17,8 @@ app.use("/api/snaps", snapRoutes);
 app.use("/api/chats", roomRoutes);
 app.use("/api/user/feedback", userFeedbackRoutes);
 app.use("/api/listener/feedback", listenerFeedbackRoutes);
+app.use("/api/reports", reportRoutes);
+
 
 
 
