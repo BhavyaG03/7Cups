@@ -56,6 +56,18 @@ const initSocket = (server) => {
       }
     });
 
+    // ✅ Handle chat end and notify both users
+    socket.on("chatEnded", ({ room_id, listener_id, user_id }) => {
+      console.log(`Chat ended, broadcasting to room: ${room_id}`);
+
+      if (usersInRoom[room_id]) {
+        io.to(room_id).emit("chatEnded", { room_id, listener_id, user_id });
+
+        // Optionally, clear the room from tracking
+        delete usersInRoom[room_id];
+      }
+    });
+
     socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);
 

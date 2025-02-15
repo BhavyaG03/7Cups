@@ -7,7 +7,8 @@ exports.register = async (req, res) => {
   try {
     const { username, email, password, role,gender,age } = req.body;
     const status="active";
-    const rating=4;
+    const rating=0;
+    const total_ratings=0;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -26,7 +27,8 @@ exports.register = async (req, res) => {
       gender,
       age,
       room_id:null,
-      rating:rating
+      rating:rating,
+      total_ratings:total_ratings
     });
 
     await newUser.save();

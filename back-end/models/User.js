@@ -40,8 +40,10 @@ const userSchema = new mongoose.Schema(
       default:null
     },
     rating:{
-      type: Number,
-      default:4
+      type:Number,
+    },
+    total_ratings:{
+      type:Number
     }
   },
   { timestamps: true }
