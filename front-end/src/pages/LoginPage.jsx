@@ -8,13 +8,13 @@ function LoginPage() {
   const apiUrl = import.meta.env.VITE_API_URL;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false); // ⬅️ Loading state
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true); // ⬅️ Show loading spinner
+    setLoading(true); // Show loading spinner
     try {
       const res = await axios.post(`${apiUrl}/api/users/login`, { email, password });
 
@@ -35,13 +35,20 @@ function LoginPage() {
     } catch (err) {
       alert(err.response?.data?.message || "Error logging in");
     } finally {
-      setLoading(false); // ⬅️ Hide loading spinner
+      setLoading(false); // Hide loading spinner
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-tr from-gray-500 to-gray-700">
-      <div className="flex flex-col items-center w-full max-w-4xl overflow-hidden bg-white rounded-lg shadow-lg md:flex-row">
+    <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-tr from-gray-500 to-gray-700">
+      <div className="relative flex flex-col items-center w-full max-w-4xl overflow-hidden bg-white rounded-lg shadow-lg md:flex-row">
+        {/* Loading Overlay */}
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80">
+            <div className="w-16 h-16 border-8 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+          </div>
+        )}
+
         {/* Left Side with Image */}
         <div className="hidden w-1/2 md:block">
           <img
@@ -70,6 +77,7 @@ function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="block w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                disabled={loading} // Disable input while loading
               />
             </div>
 
@@ -84,6 +92,7 @@ function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="block w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                disabled={loading} // Disable input while loading
               />
             </div>
 
@@ -93,6 +102,7 @@ function LoginPage() {
                   type="checkbox"
                   id="rememberMe"
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  disabled={loading} // Disable checkbox while loading
                 />
                 <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-600">
                   Remember me
@@ -105,14 +115,10 @@ function LoginPage() {
 
             <button
               type="submit"
-              className="flex items-center justify-center w-full py-2 text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={loading} // ⬅️ Disable button when loading
+              className="w-full py-2 text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={loading} // Disable button when loading
             >
-              {loading ? (
-                <div className="w-6 h-6 border-4 border-white rounded-full border-t-transparent animate-spin"></div>
-              ) : (
-                "Login"
-              )}
+              Login
             </button>
           </form>
 

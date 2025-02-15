@@ -75,69 +75,77 @@ function ChatPage() {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/chats/${room}`);
       const { room_id, listener_id, user_id } = response.data;
-  
-      console.log("Chat ended, emitting event:", { room_id, listener_id, user_id });
-  
-      // Emit event to notify both user and listener
-      socket.emit("chatEnded", { room_id, listener_id, user_id });
-  
+
+      console.log("Chat ended, emitting event to room:", room_id);
+
+      // Emit event to the room instead of just individual users
+      socket.emit("chatEnded", { room_id, listener_id, user_id }, room_id);
+
       // Redirect the user who clicked the button
       navigate("/review", { state: { room_id, listener_id, user_id } });
     } catch (error) {
       console.error("Error getting chat data:", error);
     }
   };
-  
+
   useEffect(() => {
     socket.on("chatEnded", ({ room_id, listener_id, user_id }) => {
-      console.log("Received chatEnded event, redirecting...", { room_id, listener_id, user_id });
-      
+      console.log("Received chatEnded event for room:", room_id);
+
       navigate("/review", { state: { room_id, listener_id, user_id } });
     });
-  
+
     return () => socket.off("chatEnded");
   }, []);
-  const report =async () => {
-    const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/chats/${room}`);
+
+  const report = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/chats/${room}`);
       const { room_id, listener_id, user_id } = response.data;
-      let reported_person="";
-      let reported_by="";
-      if (role==="user") {
-        reported_person=listener_id;
-        reported_by=user_id;
+      let reported_person = "";
+      let reported_by = "";
+
+      if (role === "user") {
+        reported_person = listener_id;
+        reported_by = user_id;
+      } else if (role === "listener") {
+        reported_person = user_id;
+        reported_by = listener_id;
       }
-      else if(role==="listener"){
-        reported_person=user_id;
-        reported_by=listener_id;
-      }
+
       navigate("/report", { state: { reported_by, room_id, reported_person } });
-  }
+    } catch (error) {
+      console.error("Error reporting user:", error);
+    }
+  };
+
   const sos = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/chats/${room}`);
       const { room_id, listener_id, user_id } = response.data;
-  
+
       console.log("SOS triggered, emitting event:", { room_id, listener_id, user_id });
-        socket.emit("sos", { room_id, listener_id, user_id });
-        if (role === "user") {
+      socket.emit("sos", { room_id, listener_id, user_id }, room_id);
+
+      if (role === "user") {
         navigate("/pro/therapy");
       }
     } catch (error) {
       console.error("Error triggering SOS:", error);
     }
   };
-  
+
   useEffect(() => {
     socket.on("sos", ({ room_id, listener_id, user_id }) => {
       console.log("Received SOS event, redirecting user...", { room_id, listener_id, user_id });
-        if (role === "user") {
+
+      if (role === "user") {
         navigate("/pro/therapy");
       }
     });
-  
+
     return () => socket.off("sos");
   }, []);
-  
 
   return (
     <div className="relative flex items-center justify-center min-h-screen p-4 text-white bg-gray-400 bg-center bg-cover">
@@ -178,20 +186,17 @@ function ChatPage() {
             Send
           </button>
           <div className="flex flex-col items-start justify-start gap-2">
-          <button
-            onClick={report}
-            className="px-6 py-2 text-white bg-red-600 rounded-full w-28 hover:bg-red-800"
-          >
-            Report
-          </button>
-          <button onClick={endChat} className="px-6 py-2 text-white bg-yellow-400 rounded-full w-28 hover:bg-yellow-500">
-            End Chat
-          </button>
+            <button onClick={report} className="px-6 py-2 text-white bg-red-600 rounded-full w-28 hover:bg-red-800">
+              Report
+            </button>
+            <button onClick={endChat} className="px-6 py-2 text-white bg-yellow-400 rounded-full w-28 hover:bg-yellow-500">
+              End Chat
+            </button>
           </div>
           <button
             onClick={sos}
             className={`${role === "listener" ? "px-6 py-2 text-white bg-red-900 rounded-full w-28 hover:bg-red-500" : "hidden"}`}
-            >
+          >
             SOS
           </button>
         </div>
