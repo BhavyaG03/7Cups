@@ -171,7 +171,7 @@ function ChatPage() {
   }, []); */
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen p-4 text-white bg-gray-400 bg-center bg-cover">
+    <div className="relative flex flex-col items-center justify-center min-h-screen p-4 text-white bg-gray-400 bg-center bg-cover">
       <div className="relative flex flex-col w-full max-w-5xl gap-3 p-6 shadow-lg bg-slate-600 bg-opacity-80 rounded-xl backdrop-blur-lg">
         <h2 className="text-4xl font-extrabold text-center text-gray-800">
           Chat Room: {room || "None"}
@@ -224,6 +224,12 @@ function ChatPage() {
           </button>
         </div>
       </div>
+      <p className="w-1/2 mt-4 text-xs text-center text-gray-700">
+  ⚠ Please remember: Calmify is not a substitute for therapy or emergency services. Our volunteers are here to listen and support, but they are not mental health professionals. If you are in crisis or need urgent help, please contact a licensed professional or a crisis hotline immediately.
+  <br />
+  <span className="text-[10px]">For your safety, do not share personal identification details during this chat.</span>
+</p>
+
     </div>
   );
 }
