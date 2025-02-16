@@ -30,6 +30,7 @@ const ReviewPage = () => {
           was_helpful: helpful,
           unhelpful_details: helpful === false ? reason : "",
         });
+        navigate("/user/dashboard");
       } else {
         await axios.post(`${import.meta.env.VITE_API_URL}/api/listener/feedback`, {
           room_id,
@@ -39,10 +40,10 @@ const ReviewPage = () => {
           speaker_behavior: speakerBehavior,
           inappropriate_details: speakerBehavior === "Inappropriate" ? inappropriateDetails : "",
         });
+        navigate("/listener/dashboard");
       }
 
       alert("Feedback submitted successfully!");
-      navigate("/");
     } catch (error) {
       console.error("Error submitting feedback:", error);
     }

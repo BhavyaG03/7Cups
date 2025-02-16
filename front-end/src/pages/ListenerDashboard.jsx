@@ -25,8 +25,8 @@ const ListenerDashboard = () => {
     console.log("Generated Room ID:", roomId);
   
     try {
-      const res = await axios.put(`${apiUrl}/api/users/edit/${user.user.id}`, { room_id: roomId });
-  
+      const res = await axios.put(`${apiUrl}/api/users/edit/${user.user.id}`, { room_id: roomId,status:"active" });
+      console.log("status active now")
       console.log("API Response:", res.data); 
       await axios.post(`${apiUrl}/api/chats`, {
                 room_id: roomId,

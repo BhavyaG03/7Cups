@@ -14,14 +14,12 @@ function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true); // Show loading spinner
+    setLoading(true);
     try {
       const res = await axios.post(`${apiUrl}/api/users/login`, { email, password });
 
       // Save user data to Redux
       dispatch(loginSuccess(res.data));
-      await axios.put(`${apiUrl}/api/users/edit/${res.data.user.id}`, { status: "active" });
-
       // Navigate based on user role
       if (res.data.role === "listener") {
         navigate("/listener/dashboard");

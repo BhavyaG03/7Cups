@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 function QuestionPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [responses, setResponses] = useState({});
+  const [selectedOptions, setSelectedOptions] = useState([]);
   const [showListeners, setShowListeners] = useState(false);
   const [listeners, setListeners] = useState([]);
   const [additionalMessage, setAdditionalMessage] = useState("");
@@ -27,7 +28,7 @@ function QuestionPage() {
         "I am struggling with my relationships.",
         "I feel overwhelmed by family expectations or conflicts.",
       ],
-      multiple: true,
+      multiple: true, // Enables multi-select
     },
     {
       key: "additional",
@@ -41,7 +42,7 @@ function QuestionPage() {
         "I just want to vent and express my thoughts.",
         "I want someone to listen and understand me.",
         "I need help making sense of my emotions.",
-        "I want to feel less alone in what I’m going through.",
+        "I want to feel less alone in what I am going through.",
         "I don't know, I just need to talk.",
       ],
     },
@@ -50,26 +51,54 @@ function QuestionPage() {
   const navigate = useNavigate();
   const progressBarWidth = ((currentQuestion + 1) / questions.length) * 100;
 
-  const handleNext = (answer) => {
-    setResponses({ ...responses, [questions[currentQuestion].key]: answer });
+  const handleOptionClick = (option) => {
+    const currentQ = questions[currentQuestion];
 
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
+    if (currentQ.multiple) {
+      // Toggle selection for multi-select questions
+      setSelectedOptions((prev) =>
+        prev.includes(option) ? prev.filter((opt) => opt !== option) : [...prev, option]
+      );
     } else {
-      storeResponses();
+      // Single-choice questions move to the next immediately
+      handleNext(option);
     }
   };
 
-  const storeResponses = async () => {
+  const handleNext = (answer) => {
+    const currentQ = questions[currentQuestion];
+  
+    // Store the response in state
+    setResponses((prevResponses) => {
+      const updatedResponses = { ...prevResponses, [currentQ.key]: answer };
+  
+      // If it's the last question, submit the responses
+      if (currentQuestion === questions.length - 1) {
+        storeResponses(updatedResponses);
+      }
+  
+      return updatedResponses;
+    });
+  
+    // Move to the next question if not the last one
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    }
+  };
+  
+
+  const storeResponses = async (finalResponses) => {
     try {
       const payload = {
-        userId: id, // Correct key name
-        responses: Object.keys(responses).map((key) => ({
-          question: questions.find((q) => q.key === key)?.question || key, // Get actual question
-          answer: responses[key],
+        userId: id,
+        responses: Object.keys(finalResponses).map((key) => ({
+          question: questions.find((q) => q.key === key)?.question || key,
+          answer: finalResponses[key],
         })),
-        additionalNotes: responses.additional || "", // Ensure additional notes are included
+        additionalNotes: finalResponses.additional || "",
       };
+  
+      console.log("Final Payload:", payload); // Debugging log
   
       await axios.post(`${import.meta.env.VITE_API_URL}/api/responses`, payload);
       fetchListeners();
@@ -77,7 +106,6 @@ function QuestionPage() {
       console.error("Error storing responses:", error);
     }
   };
-  
   
 
   const fetchListeners = async () => {
@@ -98,7 +126,6 @@ function QuestionPage() {
         console.error("User ID not found.");
         return;
       }
-      console.log("listener id", listenerRoomId);
       await axios.put(`${import.meta.env.VITE_API_URL}/api/chats/${listenerRoomId}`, {
         user_id: id,
       });
@@ -129,12 +156,24 @@ function QuestionPage() {
                 questions[currentQuestion].options.map((option, index) => (
                   <button
                     key={index}
-                    className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700 focus:outline-none"
-                    onClick={() => handleNext(option)}
+                    className={`px-4 py-2 font-bold rounded hover:bg-blue-700 focus:outline-none ${
+                      selectedOptions.includes(option) ? "bg-green-500 text-white" : "bg-blue-500 text-white"
+                    }`}
+                    onClick={() => handleOptionClick(option)}
                   >
                     {option}
                   </button>
                 ))}
+
+              {questions[currentQuestion].multiple && (
+                <button
+                  className="px-4 py-2 font-bold text-white bg-blue-600 rounded hover:bg-blue-800 focus:outline-none"
+                  onClick={() => handleNext(selectedOptions)}
+                >
+                  Continue
+                </button>
+              )}
+
               {questions[currentQuestion].type === "text" && (
                 <>
                   <textarea

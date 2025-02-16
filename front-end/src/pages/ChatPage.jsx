@@ -10,11 +10,12 @@ function ChatPage() {
   const [room, setRoom] = useState("");
   const [message, setMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
+  const [idleTimeout, setIdleTimeout] = useState(null);
 
   const user = useSelector((state) => state.user.user);
   const id = user?.user?.id;
   const role = user.role;
-  const userName = user.user.username;
+  const userName = user.user.username;//offline
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -51,6 +52,7 @@ function ChatPage() {
         setMessageList((list) =>
           list.some((msg) => msg.time === data.time && msg.message === data.message) ? list : [...list, data]
         );
+        updateStatus("busy");
       };
 
       socket.on("receive_message", handleReceiveMessage);
@@ -62,12 +64,29 @@ function ChatPage() {
     }
   }, [room]);
 
+  const updateStatus = async (status) => {
+    if (role === "listener") {
+      try {
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/users/edit/${id}`, { status:status });
+      } catch (error) {
+        console.error("Error updating status:", error);
+      }
+    }
+  };
+
+  const resetIdleTimer = () => {
+    if (idleTimeout) clearTimeout(idleTimeout);
+    setIdleTimeout(setTimeout(() => updateStatus("active"), 30000)); // 30s idle time
+  };
+
   const sendMessage = () => {
     if (message.trim() !== "" && room) {
       const msgData = { room, author: userName, message: message.trim(), time: new Date().toLocaleTimeString() };
       socket.emit("send_message", msgData);
       setMessageList((list) => [...list, { ...msgData, isLocal: true }]);
       setMessage("");
+      updateStatus("busy");
+      resetIdleTimer();
     }
   };
 
@@ -77,11 +96,9 @@ function ChatPage() {
       const { room_id, listener_id, user_id } = response.data;
 
       console.log("Chat ended, emitting event to room:", room_id);
-
-      // Emit event to the room instead of just individual users
       socket.emit("chatEnded", { room_id, listener_id, user_id }, room_id);
 
-      // Redirect the user who clicked the button
+      updateStatus("active");
       navigate("/review", { state: { room_id, listener_id, user_id } });
     } catch (error) {
       console.error("Error getting chat data:", error);
@@ -91,7 +108,6 @@ function ChatPage() {
   useEffect(() => {
     socket.on("chatEnded", ({ room_id, listener_id, user_id }) => {
       console.log("Received chatEnded event for room:", room_id);
-
       navigate("/review", { state: { room_id, listener_id, user_id } });
     });
 
@@ -146,6 +162,13 @@ function ChatPage() {
 
     return () => socket.off("sos");
   }, []);
+
+  /* useEffect(() => {
+    return () => {
+      updateStatus("offline");
+      if (idleTimeout) clearTimeout(idleTimeout);
+    };
+  }, []); */
 
   return (
     <div className="relative flex items-center justify-center min-h-screen p-4 text-white bg-gray-400 bg-center bg-cover">
