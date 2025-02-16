@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const reasons = [
   "Inappropriate language or behavior",
@@ -11,6 +12,8 @@ const reasons = [
 ];
 
 function ReportPage() {
+  const user = useSelector((state) => state.user.user);
+  const role=user.role;
   const location = useLocation();
   const navigate = useNavigate();
   const { reported_by, room_id, reported_person } = location.state || {};
@@ -36,7 +39,11 @@ function ReportPage() {
       });
 
       alert("Report submitted successfully.");
-      navigate("/"); // Redirect user after reporting
+      if (role==="user") {
+        navigate("/user/dashboard");
+      } else {
+        navigate("/listener/dashboard");
+      }
     } catch (error) {
       console.error("Error submitting report:", error);
       alert("Failed to submit report.");
