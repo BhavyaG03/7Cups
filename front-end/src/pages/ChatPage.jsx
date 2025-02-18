@@ -81,7 +81,7 @@ function ChatPage() {
 
   const sendMessage = () => {
     if (message.trim() !== "" && room) {
-      const msgData = { room, author: userName, message: message.trim(), time: new Date().toLocaleTimeString() };
+      const msgData = { room, author: role === "user" ? "Anonymous speaker" : "Anonymous listener", message: message.trim(), time: new Date().toLocaleTimeString() };
       socket.emit("send_message", msgData);
       setMessageList((list) => [...list, { ...msgData, isLocal: true }]);
       setMessage("");
@@ -224,10 +224,10 @@ function ChatPage() {
           </button>
         </div>
       </div>
-      <p className="w-1/2 mt-4 text-xs text-center text-gray-700">
+      <p className="w-1/2 mt-4 text-sm text-center text-gray-700">
   ⚠ Please remember: Calmify is not a substitute for therapy or emergency services. Our volunteers are here to listen and support, but they are not mental health professionals. If you are in crisis or need urgent help, please contact a licensed professional or a crisis hotline immediately.
   <br />
-  <span className="text-[10px]">For your safety, do not share personal identification details during this chat.</span>
+  <span className="text-[14px]">For your safety, do not share personal identification details during this chat.</span>
 </p>
 
     </div>

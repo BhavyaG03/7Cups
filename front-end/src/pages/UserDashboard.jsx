@@ -1,8 +1,9 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const UserDashboard = () => {
+  const navigate=useNavigate()
   const user = useSelector((state) => state.user.user);
   console.log(user)
   console.log("user id",user.user.id)
@@ -23,6 +24,7 @@ const UserDashboard = () => {
           body: JSON.stringify({ id }),
         });
         console.log("logged out")
+        navigate('/')
       } catch (error) {
         console.error("Error logging out:", error);
       }

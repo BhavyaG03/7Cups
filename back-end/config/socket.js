@@ -34,26 +34,6 @@ const initSocket = (server) => {
         socket.emit("error_message", { error: "You are not in this room to send a message." });
         return;
       }
-
-      try {
-        const newMessage = new Message({
-          room: msgData.room,
-          author: msgData.author,
-          message: msgData.message,
-          time: msgData.time,
-        });
-        await newMessage.save();
-
-        io.to(msgData.room).emit("receive_message", {
-          room: msgData.room,
-          author: msgData.author,
-          message: msgData.message,
-          time: msgData.time,
-        });
-      } catch (error) {
-        console.error("Error saving message:", error);
-        socket.emit("error_message", { error: "Failed to save the message" });
-      }
     });
 
     // ✅ Handle SOS alert
