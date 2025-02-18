@@ -1,7 +1,7 @@
 const socketIo = require("socket.io");
 const Message = require("../models/Message");
 
-let usersInRoom = {}; // Format: { roomName: [socket.id, ...] }
+let usersInRoom = {};
 
 const initSocket = (server) => {
   const io = socketIo(server, {
@@ -53,6 +53,16 @@ const initSocket = (server) => {
         io.to(room_id).emit("sos", { room_id, listener_id, user_id });
       }
     });
+    // ✅ Handle report alert
+    socket.on("report", ({ room_id, reported_by, reported_person }) => {
+      console.log(`Report triggered in room: ${room_id} by user ${reported_by} against ${reported_person}`);
+    
+      if (usersInRoom[room_id]) {
+        // Broadcast report event to the room with correct properties
+        io.to(room_id).emit("report", { room_id, reported_by, reported_person });
+      }
+    });
+    
 
     // ✅ Handle chat end and notify both users
     socket.on("chatEnded", ({ room_id, listener_id, user_id }) => {

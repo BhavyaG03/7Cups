@@ -89,7 +89,7 @@ const ReviewPage = () => {
               <label className="block font-semibold">Was the speaker genuine?</label>
               <select value={speakerBehavior} onChange={(e) => setSpeakerBehavior(e.target.value)} className="w-full p-2 border border-gray-300 rounded">
                 <option value="Genuine">Genuine</option>
-                <option value="Just Passing Time">Just Passing Time</option>
+                <option value="Just passing time">Just Passing Time</option>
                 <option value="Inappropriate">Inappropriate</option>
               </select>
 

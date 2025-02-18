@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Header from "../components/Header";
 
 const ListenerDashboard = () => {
   const apiUrl=import.meta.env.VITE_API_URL
@@ -47,7 +48,8 @@ const ListenerDashboard = () => {
   
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-6">
+    <div className="flex flex-col items-center justify-start min-h-screen gap-6 px-4 py-6">
+      <Header></Header>
       <h1 className="text-5xl font-bold text-gray-800">Hi {user?.user?.username}</h1>
       <button
         onClick={handleJoinChat}

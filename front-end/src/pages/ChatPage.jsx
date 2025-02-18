@@ -3,6 +3,7 @@ import io from "socket.io-client";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+import Header from "../components/Header";
 
 const socket = io(`${import.meta.env.VITE_API_URL}`, { autoConnect: false });
 
@@ -47,22 +48,29 @@ function ChatPage() {
   useEffect(() => {
     if (room) {
       socket.emit("join_room", room);
-
+  
       const handleReceiveMessage = (data) => {
         setMessageList((list) =>
           list.some((msg) => msg.time === data.time && msg.message === data.message) ? list : [...list, data]
         );
         updateStatus("busy");
       };
-
+      const handleRoomFull = (data) => {
+        alert(data.message); 
+        navigate("/user/dashboard"); 
+      };
+  
       socket.on("receive_message", handleReceiveMessage);
-
+      socket.on("room_full", handleRoomFull);
+  
       return () => {
         socket.emit("leave_room", room);
         socket.off("receive_message", handleReceiveMessage);
+        socket.off("room_full", handleRoomFull);
       };
     }
   }, [room]);
+  
 
   const updateStatus = async (status) => {
     if (role === "listener") {
@@ -76,7 +84,7 @@ function ChatPage() {
 
   const resetIdleTimer = () => {
     if (idleTimeout) clearTimeout(idleTimeout);
-    setIdleTimeout(setTimeout(() => updateStatus("active"), 30000)); // 30s idle time
+    setIdleTimeout(setTimeout(() => updateStatus("active"), 45000)); // 30s idle time
   };
 
   const sendMessage = () => {
@@ -124,16 +132,28 @@ function ChatPage() {
       if (role === "user") {
         reported_person = listener_id;
         reported_by = user_id;
+
       } else if (role === "listener") {
         reported_person = user_id;
         reported_by = listener_id;
       }
-
+      socket.emit("report", { reported_by, reported_person, room_id }, room_id);
       navigate("/report", { state: { reported_by, room_id, reported_person } });
     } catch (error) {
       console.error("Error reporting user:", error);
     }
   };
+  useEffect(() => {
+    socket.on("report", ({ reported_person, room_id,reported_by }) => {
+      if (reported_person === id) {
+        console.log("You have been reported!");
+          navigate(`/${role}/dashboard`);
+      }
+    });
+  
+    return () => socket.off("report");
+  }, [id, role]);
+  
 
   const sos = async () => {
     try {
@@ -146,6 +166,9 @@ function ChatPage() {
       if (role === "user") {
         navigate("/pro/therapy");
       }
+      if (role === "listener") {
+        navigate('/review', { state: { listener_id, room_id, user_id } });
+      }
     } catch (error) {
       console.error("Error triggering SOS:", error);
     }
@@ -157,6 +180,9 @@ function ChatPage() {
 
       if (role === "user") {
         navigate("/pro/therapy");
+      }
+      if (role === "listener") {
+        navigate('/review', { state: { listener_id, room_id, user_id } });
       }
     });
 
@@ -172,6 +198,7 @@ function ChatPage() {
 
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen p-4 text-white bg-gray-400 bg-center bg-cover">
+      <Header></Header>
       <div className="relative flex flex-col w-full max-w-5xl gap-3 p-6 shadow-lg bg-slate-600 bg-opacity-80 rounded-xl backdrop-blur-lg">
         <h2 className="text-4xl font-extrabold text-center text-gray-800">
           Chat Room: {room || "None"}

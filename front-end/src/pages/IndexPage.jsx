@@ -23,11 +23,11 @@ const IndexPage = () => {
           height="30"
           width="36"
         />
-        <p className="text-white font-normal text-[16px]">Volunteer</p>
-      <p className="text-white font-normal text-[16px]">Get Help</p>
-      <p className="text-white font-normal text-[16px]">Community</p>
-      <p className="text-white font-normal text-[16px]">Considering Therapy</p>
-      <p className="text-white font-normal text-[16px]">Organizations</p>
+        <p className="text-white font-normal text-[16px]">Our Community</p>
+<p className="text-white font-normal text-[16px]">Request Assistance</p>
+<p className="text-white font-normal text-[16px]">Volunteer</p>
+<p className="text-white font-normal text-[16px]">Exploring Therapy</p>
+<p className="text-white font-normal text-[16px]">Partner Organizations</p>
       </span>
       <div className="flex items-center gap-2">
       <Link to="/login"  className="text-white font-medium text-[18px]">Login</Link>
@@ -45,85 +45,20 @@ const IndexPage = () => {
     backgroundPosition: "center center",
     backgroundSize: "cover",
     backgroundImage:
-      "linear-gradient(270deg, rgba(58, 58, 58, 0.1) 0%, rgba(20, 20, 20, 0.5) 100%), url('//d37v7cqg82mgxu.cloudfront.net/img/home/woman-drinking-tea-overlooking-lake.jpg')",
+      "linear-gradient(270deg, rgba(58, 58, 58, 0.1) 0%, rgba(20, 20, 20, 0.5) 100%), url('https://wallpapers.com/images/hd/soothing-mv39d70ig1kgyg5y.jpg')",
   }}
 >
   <div className="mb-5 ml-40 flex-grow-1 d-flex align-items-center">
     <div className="col-sm-8 col-md-8 col-lg-7 col-xl-6 col-xxl-5">
-      <div className="d-inline-flex me-3">
-        <img
-          src="//d37v7cqg82mgxu.cloudfront.net/img/banner-quoter-left-light.svg"
-          alt=""
-          style={{ width: "20px", height: "67.5px" }}
-        />
-        <div className="flex-grow-1 d-flex align-items-center">
-          <div className="px-2 text-center">
-            <div className="fw-semibold lh-1">4.5 Rating</div>
-            <div className="small lh-1">On AppStore</div>
-            <div className="text-info">
-              <i className="fa-solid fa-star" aria-hidden="true"></i>
-              <i className="fa-solid fa-star" aria-hidden="true"></i>
-              <i className="fa-solid fa-star" aria-hidden="true"></i>
-              <i className="fa-solid fa-star" aria-hidden="true"></i>
-              <i className="fa-solid fa-star-half" aria-hidden="true"></i>
-            </div>
-          </div>
-        </div>
-        <img
-          src="//d37v7cqg82mgxu.cloudfront.net/img/banner-quoter-right-light.svg"
-          alt=""
-          style={{ width: "20px", height: "67.5px" }}
-        />
-      </div>
 
-      <div className="d-inline-flex">
-        <img
-          src="//d37v7cqg82mgxu.cloudfront.net/img/banner-quoter-left-light.svg"
-          alt=""
-          style={{ width: "20px", height: "67.5px" }}
-        />
-        <div className="flex-grow-1 d-flex align-items-center">
-          <div className="px-2 text-center">
-            <div className="fw-semibold lh-1">4.7 Rating</div>
-            <div className="small lh-1">On Trustpilot</div>
-            <div className="text-info">
-              <i className="fa-solid fa-star-1" aria-hidden="true"></i>
-              <i className="fa-solid fa-star-1" aria-hidden="true"></i>
-              <i className="fa-solid fa-star-1" aria-hidden="true"></i>
-              <i className="fa-solid fa-star-1" aria-hidden="true"></i>
-              <i className="fa-solid fa-star-1" aria-hidden="true"></i>
-            </div>
-          </div>
-        </div>
-        <img
-          src="//d37v7cqg82mgxu.cloudfront.net/img/banner-quoter-right-light.svg"
-          alt=""
-          style={{ width: "20px", height: "67.5px" }}
-        />
-      </div>
       <h1 className="w-full mb-0 fw-bold">
         Need someone to talk to? <br />
         Our counselors and listeners are standing by.
       </h1>
-      <p className="col-10 col-sm-9 col-md-6">
-        Calmify connects you to caring listeners for free emotional support.
-      </p>
       <div
-        className="d-flex flex-column align-items-center"
+        className="mt-4 d-flex flex-column align-items-center"
         style={{ width: "fit-content" }}
       >
-        <a
-          href="/welcome/?_cta%5Buri_requested%5D=%2Fwelcome%2F&_cta%5Blocation%5D=homepage&_cta%5BsubLocation%5D=topsplash"
-          className="px-5 btn btn-lg btn-warning fw-semibold"
-        >
-          Get started
-        </a>
-        <a
-          href="/online-therapy/?_cta%5Btype%5D=therapy&_cta%5Blocation%5D=homepage&_cta%5BsubLocation%5D=topsplash"
-          className="pt-2 text-white text-hover-underline fw-semibold"
-        >
-          Considering therapy?
-        </a>
       </div>
     </div>
   </div>
