@@ -26,9 +26,6 @@ const Header = () => {
   return (
     <div className="flex items-center justify-between w-full h-10 px-6">
         <div className="flex items-center justify-start gap-4">
-          <Link className="font-sans text-xl font-medium text-black">
-            Calmify
-          </Link>
           <Link to={`/${role}/dashboard`} className="font-sans text-xl font-medium text-black">
             Dashboard
           </Link>

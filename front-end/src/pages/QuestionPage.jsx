@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -28,7 +28,7 @@ function QuestionPage() {
         "I am struggling with my relationships.",
         "I feel overwhelmed by family expectations or conflicts.",
       ],
-      multiple: true, // Enables multi-select
+      multiple: true,
     },
     {
       key: "additional",
@@ -50,42 +50,46 @@ function QuestionPage() {
 
   const navigate = useNavigate();
   const progressBarWidth = ((currentQuestion + 1) / questions.length) * 100;
+  useEffect(() => {
+    if (showListeners) {
+      fetchListeners();
+    }
+  }, [showListeners]); 
 
   const handleOptionClick = (option) => {
     const currentQ = questions[currentQuestion];
 
     if (currentQ.multiple) {
-      // Toggle selection for multi-select questions
-      setSelectedOptions((prev) =>
-        prev.includes(option) ? prev.filter((opt) => opt !== option) : [...prev, option]
-      );
+      setSelectedOptions((prev) => {
+        const newSelection = prev.includes(option)
+          ? prev.filter((opt) => opt !== option)
+          : [...prev, option];
+
+        return newSelection;
+      });
     } else {
-      // Single-choice questions move to the next immediately
       handleNext(option);
     }
   };
 
   const handleNext = (answer) => {
     const currentQ = questions[currentQuestion];
-  
-    // Store the response in state
+
     setResponses((prevResponses) => {
       const updatedResponses = { ...prevResponses, [currentQ.key]: answer };
-  
-      // If it's the last question, submit the responses
+
       if (currentQuestion === questions.length - 1) {
         storeResponses(updatedResponses);
       }
-  
+
       return updatedResponses;
     });
-  
-    // Move to the next question if not the last one
+
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
+      setSelectedOptions([]);
     }
   };
-  
 
   const storeResponses = async (finalResponses) => {
     try {
@@ -97,16 +101,13 @@ function QuestionPage() {
         })),
         additionalNotes: finalResponses.additional || "",
       };
-  
-      console.log("Final Payload:", payload); // Debugging log
-  
+
       await axios.post(`${import.meta.env.VITE_API_URL}/api/responses`, payload);
-      fetchListeners();
+      setShowListeners(true);
     } catch (error) {
       console.error("Error storing responses:", error);
     }
   };
-  
 
   const fetchListeners = async () => {
     try {
@@ -147,16 +148,20 @@ function QuestionPage() {
               style={{ width: `${progressBarWidth}%` }}
             ></div>
           </div>
-          <div className="p-8 bg-white rounded-lg shadow-md w-96">
+          <div className="w-full max-w-4xl p-8 bg-white rounded-lg shadow-md">
             <h2 className="mb-4 text-2xl font-semibold text-center">
               {questions[currentQuestion].question}
             </h2>
-            <div className="flex flex-col gap-4">
+            <div
+              className={`grid ${
+                currentQuestion === 0 ? "grid-cols-3 gap-4" : "flex flex-col gap-4 justify-center items-center w-full"
+              }`}
+            >
               {questions[currentQuestion].options &&
                 questions[currentQuestion].options.map((option, index) => (
                   <button
                     key={index}
-                    className={`px-4 py-2 font-bold rounded hover:bg-blue-700 focus:outline-none ${
+                    className={`px-4 max-w-96 w-full py-2 font-bold rounded focus:outline-none transition-all ${
                       selectedOptions.includes(option) ? "bg-green-500 text-white" : "bg-blue-500 text-white"
                     }`}
                     onClick={() => handleOptionClick(option)}
@@ -177,7 +182,7 @@ function QuestionPage() {
               {questions[currentQuestion].type === "text" && (
                 <>
                   <textarea
-                    className="w-full p-2 border border-gray-300 rounded"
+                    className="w-full p-2 border border-gray-300 rounded min-w-96"
                     placeholder="Type your thoughts here..."
                     value={additionalMessage}
                     onChange={(e) => setAdditionalMessage(e.target.value)}
@@ -195,9 +200,7 @@ function QuestionPage() {
         </>
       ) : (
         <div className="p-8 bg-white rounded-lg shadow-md w-96">
-          <h2 className="mb-4 text-2xl font-semibold text-center">
-            Available Listeners
-          </h2>
+          <h2 className="mb-4 text-2xl font-semibold text-center">Available Listeners</h2>
           <ul>
             {listeners.map((listener) => (
               <li
@@ -214,19 +217,6 @@ function QuestionPage() {
               </li>
             ))}
           </ul>
-          <div className="w-full max-w-2xl p-3 mt-4 text-xs text-gray-800 rounded-md shadow-md bg-white/10 backdrop-blur-xl">
-  <h3 className="mb-1 text-sm font-semibold text-center text-gray-800">General Disclaimer</h3>
-  <p className="leading-tight text-center">
-    Calmify is an emotional well-being platform offering a safe space for open conversations. 
-    Our volunteers are trained peers, not mental health professionals, and cannot diagnose, 
-    treat, or provide medical advice.
-    <br /><br />
-    This is not a substitute for therapy or emergency services. If you're in crisis or need urgent help, 
-    please contact a licensed professional or a crisis hotline.
-    <br /><br />
-    For your safety, do not share personal identification details on this platform.
-  </p>
-</div>
         </div>
       )}
     </div>

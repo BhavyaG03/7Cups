@@ -84,12 +84,12 @@ function ChatPage() {
 
   const resetIdleTimer = () => {
     if (idleTimeout) clearTimeout(idleTimeout);
-    setIdleTimeout(setTimeout(() => updateStatus("active"), 45000)); // 30s idle time
+    setIdleTimeout(setTimeout(() => updateStatus("busy"), 45000));
   };
 
   const sendMessage = () => {
     if (message.trim() !== "" && room) {
-      const msgData = { room, author: role === "user" ? "Anonymous speaker" : "Anonymous listener", message: message.trim(), time: new Date().toLocaleTimeString() };
+      const msgData = { room, author: role === "user" ? "Anonymous speaker" : userName, message: message.trim(), time: new Date().toLocaleTimeString() };
       socket.emit("send_message", msgData);
       setMessageList((list) => [...list, { ...msgData, isLocal: true }]);
       setMessage("");
@@ -102,21 +102,20 @@ function ChatPage() {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/chats/${room}`);
       const { room_id, listener_id, user_id } = response.data;
-
+      let user_role=role;
       console.log("Chat ended, emitting event to room:", room_id);
-      socket.emit("chatEnded", { room_id, listener_id, user_id }, room_id);
-
-      updateStatus("active");
-      navigate("/review", { state: { room_id, listener_id, user_id } });
+      socket.emit("chatEnded", { room_id, listener_id, user_id,user_role }, room_id);
+      navigate("/review", { state: { room_id, listener_id, user_id,user_role } });
     } catch (error) {
       console.error("Error getting chat data:", error);
     }
   };
 
   useEffect(() => {
-    socket.on("chatEnded", ({ room_id, listener_id, user_id }) => {
+    socket.on("chatEnded", ({ room_id, listener_id, user_id,user_role }) => {
       console.log("Received chatEnded event for room:", room_id);
-      navigate("/review", { state: { room_id, listener_id, user_id } });
+      alert(`Chat ended by ${user_role}`)
+      navigate("/review", { state: { room_id, listener_id, user_id,user_role } });
     });
 
     return () => socket.off("chatEnded");
@@ -136,6 +135,7 @@ function ChatPage() {
       } else if (role === "listener") {
         reported_person = user_id;
         reported_by = listener_id;
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/users/logout`,{id:id})
       }
       socket.emit("report", { reported_by, reported_person, room_id }, room_id);
       navigate("/report", { state: { reported_by, room_id, reported_person } });
@@ -146,7 +146,8 @@ function ChatPage() {
   useEffect(() => {
     socket.on("report", ({ reported_person, room_id,reported_by }) => {
       if (reported_person === id) {
-        console.log("You have been reported!");
+        console.log("ur reported")
+        alert("⚠ You have been reported for inappropriate behavior.\n\nOur platform is a safe space for respectful and supportive conversations. If you continue to violate our community guidelines, your account will be automatically banned.");
           navigate(`/${role}/dashboard`);
       }
     });

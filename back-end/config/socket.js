@@ -37,7 +37,6 @@ const initSocket = (server) => {
        // Store the message in the database
        try {
         const newMessage = new Message(msgData);
-        await newMessage.save();
         io.to(msgData.room).emit("receive_message", msgData);
       } catch (error) {
         console.error("Error saving message:", error);
@@ -65,11 +64,11 @@ const initSocket = (server) => {
     
 
     // ✅ Handle chat end and notify both users
-    socket.on("chatEnded", ({ room_id, listener_id, user_id }) => {
+    socket.on("chatEnded", ({ room_id, listener_id, user_id,user_role }) => {
       console.log(`Chat ended, broadcasting to room: ${room_id}`);
 
       if (usersInRoom[room_id]) {
-        io.to(room_id).emit("chatEnded", { room_id, listener_id, user_id });
+        io.to(room_id).emit("chatEnded", { room_id, listener_id, user_id,user_role });
 
         // Optionally, clear the room from tracking
         delete usersInRoom[room_id];
