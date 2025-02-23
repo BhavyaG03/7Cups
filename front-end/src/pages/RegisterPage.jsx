@@ -149,7 +149,7 @@ function RegisterPage() {
       <div className="w-full max-w-2xl p-3 mt-4 text-xs text-gray-800 rounded-md shadow-md bg-white/10 backdrop-blur-xl">
   <h3 className="mb-1 text-sm font-semibold text-center text-gray-800">General Disclaimer</h3>
   <p className="leading-tight text-center">
-    Calmify is an emotional well-being platform offering a safe space for open conversations. 
+    MindFree is an emotional well-being platform offering a safe space for open conversations. 
     Our volunteers are trained peers, not mental health professionals, and cannot diagnose, 
     treat, or provide medical advice.
     <br /><br />

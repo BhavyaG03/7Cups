@@ -253,7 +253,7 @@ function ChatPage() {
         </div>
       </div>
       <p className="w-1/2 mt-4 text-sm text-center text-gray-700">
-  ⚠ Please remember: Calmify is not a substitute for therapy or emergency services. Our volunteers are here to listen and support, but they are not mental health professionals. If you are in crisis or need urgent help, please contact a licensed professional or a crisis hotline immediately.
+  ⚠ Please remember: MindFree is not a substitute for therapy or emergency services. Our volunteers are here to listen and support, but they are not mental health professionals. If you are in crisis or need urgent help, please contact a licensed professional or a crisis hotline immediately.
   <br />
   <span className="text-[14px]">For your safety, do not share personal identification details during this chat.</span>
 </p>

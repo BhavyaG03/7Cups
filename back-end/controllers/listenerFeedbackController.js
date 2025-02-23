@@ -40,3 +40,12 @@ exports.getListenerFeedbackForRoom = async (req, res) => {
     res.status(500).json({ error: "Server error", details: error.message });
   }
 };
+exports.deleteAll = async (req, res) => {
+  try {
+    const feedbacks = await ListenerFeedback.deleteMany();
+
+    res.status(200).json(feedbacks);
+  } catch (error) {
+    res.status(500).json({ error: "Server error", details: error.message });
+  }
+};

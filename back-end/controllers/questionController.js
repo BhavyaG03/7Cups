@@ -38,5 +38,13 @@ const getUserResponses = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+const deleteAll = async (req, res) => {
+  try {
+    const questions = await Question.deleteMany();
 
-module.exports = { saveResponses, getUserResponses };
+    res.status(200).json(questions);
+  } catch (error) {
+    res.status(500).json({ error: "Server error", details: error.message });
+  }
+};
+module.exports = { saveResponses, getUserResponses,deleteAll };

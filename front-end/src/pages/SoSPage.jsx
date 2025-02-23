@@ -16,7 +16,7 @@ const SoSPage = () => {
         {/* Explanation Section */}
         <div className="mt-4">
           <p className="text-gray-800">
-            At <span className="font-semibold">Calmify</span>, our listeners are trained peers, not professionals. 
+            At <span className="font-semibold">MindFree</span>, our listeners are trained peers, not professionals. 
             If you feel you need further support, we encourage you to reach out to a mental health professional or a trusted support system.
           </p>
         </div>

@@ -73,7 +73,7 @@ const IndexPage = () => {
           <div className="col-10 col-sm-11 col-md-12">
             <h2 className="mb-0 fw-bold fs-4 mb-md-1">Free 24/7 Chat</h2>
             <p>
-              Calmify connects you to caring listeners for free emotional
+              MindFree connects you to caring listeners for free emotional
               support.
             </p>
           </div>

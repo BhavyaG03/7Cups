@@ -28,10 +28,10 @@ const UserDashboard = () => {
             </button>
           </Link>
 
-          {/* New Calmify Introduction Section */}
+          {/* New MindFree Introduction Section */}
           <div className="w-full max-w-3xl p-6 mt-8 text-sm text-gray-800 bg-white rounded-md shadow-md">
             <h2 className="text-lg font-bold text-center text-gray-900">
-              Welcome to Calmify!
+              Welcome to MindFree!
             </h2>
             <p className="mt-2 text-center">
               We are an emotional support platform that connects you with a
@@ -80,7 +80,7 @@ const UserDashboard = () => {
               General Disclaimer
             </h3>
             <p className="leading-tight text-center">
-              Calmify is an emotional well-being platform offering a safe space
+              MindFree is an emotional well-being platform offering a safe space
               for open conversations. Our volunteers are trained peers, not
               mental health professionals, and cannot diagnose, treat, or
               provide medical advice.
