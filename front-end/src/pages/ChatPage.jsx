@@ -4,6 +4,10 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
+
 
 const socket = io(`${import.meta.env.VITE_API_URL}`, { autoConnect: false });
 
@@ -48,6 +52,17 @@ function ChatPage() {
   useEffect(() => {
     if (room) {
       socket.emit("join_room", room);
+      socket.on("user_joined", ({ userName }) => {
+        new Audio("/discordJoin.mp3").play();
+        toast.info("Someone joined the chat");
+      });
+      
+      socket.on("user_left", ({ userName }) => {
+        new Audio("/discordLeave.mp3").play();
+        toast.warning("Someone left the chat");
+      });
+      
+      
   
       const handleReceiveMessage = (data) => {
         setMessageList((list) =>
@@ -200,6 +215,7 @@ function ChatPage() {
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen p-4 text-white bg-gray-400 bg-center bg-cover">
       <Header></Header>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick />
       <div className="relative flex flex-col w-full max-w-5xl gap-3 p-6 shadow-lg bg-slate-600 bg-opacity-80 rounded-xl backdrop-blur-lg">
         <h2 className="text-4xl font-extrabold text-center text-gray-800">
           Chat Room: {room || "None"}
