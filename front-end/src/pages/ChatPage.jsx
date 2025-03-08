@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -16,6 +16,12 @@ function ChatPage() {
   const [message, setMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
   const [idleTimeout, setIdleTimeout] = useState(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingUser, setTypingUser] = useState("");
+  const [typingTimeout, setTypingTimeout] = useState(null);
+  
+  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
   const user = useSelector((state) => state.user.user);
   const id = user?.user?.id;
@@ -62,14 +68,33 @@ function ChatPage() {
         toast.warning("Someone left the chat");
       });
       
+      // Setup typing indicator listener
+      socket.on("user_typing", ({ userName }) => {
+        console.log("Typing event received from:", userName);
+        setIsTyping(true);
+        setTypingUser(userName);
+        
+        // Clear previous timeout if exists
+        if (typingTimeout) clearTimeout(typingTimeout);
+        
+        // Set new timeout to hide typing indicator after 3 seconds
+        const timeout = setTimeout(() => {
+          setIsTyping(false);
+          setTypingUser("");
+        }, 3000);
+        
+        setTypingTimeout(timeout);
+      });
       
-  
       const handleReceiveMessage = (data) => {
         setMessageList((list) =>
           list.some((msg) => msg.time === data.time && msg.message === data.message) ? list : [...list, data]
         );
         updateStatus("busy");
+        // Hide typing indicator when message is received
+        setIsTyping(false);
       };
+      
       const handleRoomFull = (data) => {
         alert(data.message); 
         navigate("/user/dashboard"); 
@@ -82,10 +107,19 @@ function ChatPage() {
         socket.emit("leave_room", room);
         socket.off("receive_message", handleReceiveMessage);
         socket.off("room_full", handleRoomFull);
+        socket.off("user_typing");
       };
     }
   }, [room]);
   
+  // Auto-scroll to latest message whenever messageList updates
+  useEffect(() => {
+    scrollToBottom();
+  }, [messageList, isTyping]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const updateStatus = async (status) => {
     if (role === "listener") {
@@ -102,6 +136,25 @@ function ChatPage() {
     setIdleTimeout(setTimeout(() => updateStatus("busy"), 45000));
   };
 
+  // Debounced typing notification to prevent spam
+  const [typingTimerId, setTypingTimerId] = useState(null);
+  
+  const handleTyping = () => {
+    if (!room) return;
+    
+    // Clear existing timer
+    if (typingTimerId) clearTimeout(typingTimerId);
+    
+    // Set a new timer that will emit typing event
+    const timerId = setTimeout(() => {
+      const author = role === "user" ? "Anonymous speaker" : userName;
+      console.log("Emitting typing event for:", author, "in room:", room);
+      socket.emit("user_typing", { room, userName: author });
+    }, 300); // 300ms debounce
+    
+    setTypingTimerId(timerId);
+  };
+
   const sendMessage = () => {
     if (message.trim() !== "" && room) {
       const msgData = { room, author: role === "user" ? "Anonymous speaker" : userName, message: message.trim(), time: new Date().toLocaleTimeString() };
@@ -110,6 +163,12 @@ function ChatPage() {
       setMessage("");
       updateStatus("busy");
       resetIdleTimer();
+      
+      // Clear typing status when sending a message
+      if (typingTimerId) {
+        clearTimeout(typingTimerId);
+        setTypingTimerId(null);
+      }
     }
   };
 
@@ -205,12 +264,14 @@ function ChatPage() {
     return () => socket.off("sos");
   }, []);
 
-  /* useEffect(() => {
+  // Clean up function
+  useEffect(() => {
     return () => {
-      updateStatus("offline");
       if (idleTimeout) clearTimeout(idleTimeout);
+      if (typingTimeout) clearTimeout(typingTimeout);
+      if (typingTimerId) clearTimeout(typingTimerId);
     };
-  }, []); */
+  }, [idleTimeout, typingTimeout, typingTimerId]);
 
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen p-4 text-white bg-gray-400 bg-center bg-cover">
@@ -221,7 +282,10 @@ function ChatPage() {
           Chat Room: {room || "None"}
         </h2>
 
-        <div className="p-4 mb-6 space-y-4 overflow-y-auto bg-gray-200 rounded-lg shadow-md h-96">
+        <div 
+          ref={chatContainerRef} 
+          className="p-4 mb-6 space-y-4 overflow-y-auto bg-gray-200 rounded-lg shadow-md h-96"
+        >
           {messageList.map((msg, i) => (
             <div key={i} className={`flex ${msg.isLocal ? "justify-end" : "justify-start"} items-center`}>
               <div
@@ -237,13 +301,32 @@ function ChatPage() {
               </div>
             </div>
           ))}
+          {isTyping && (
+            <div className="flex items-center justify-start">
+              <div className="px-3 py-2 text-white bg-gray-400 rounded-lg shadow-md">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">typing</span>
+                  <div className="typing-animation">
+                    <span className="dot"></span>
+                    <span className="dot"></span>
+                    <span className="dot"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
         </div>
         <div className="flex items-end w-full h-[55px] space-x-4">
           <input
             type="text"
             placeholder="Type your message..."
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={(e) => {
+              setMessage(e.target.value);
+              // Call handleTyping on input change
+              handleTyping();
+            }}
             onKeyUp={(e) => {
               if (e.key === "Enter") sendMessage();
             }}
@@ -269,11 +352,40 @@ function ChatPage() {
         </div>
       </div>
       <p className="w-1/2 mt-4 text-sm text-center text-gray-700">
-  ⚠ Please remember: MindFree is not a substitute for therapy or emergency services. Our volunteers are here to listen and support, but they are not mental health professionals. If you are in crisis or need urgent help, please contact a licensed professional or a crisis hotline immediately.
-  <br />
-  <span className="text-[14px]">For your safety, do not share personal identification details during this chat.</span>
-</p>
+        ⚠ Please remember: MindFree is not a substitute for therapy or emergency services. Our volunteers are here to listen and support, but they are not mental health professionals. If you are in crisis or need urgent help, please contact a licensed professional or a crisis hotline immediately.
+        <br />
+        <span className="text-[14px]">For your safety, do not share personal identification details during this chat.</span>
+      </p>
 
+      <style jsx>{`
+        .typing-animation {
+          display: inline-flex;
+          align-items: center;
+        }
+        
+        .dot {
+          margin: 0 1px;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background-color: white;
+          animation: bounce 1.4s infinite;
+          opacity: 0.7;
+        }
+        
+        .dot:nth-child(2) {
+          animation-delay: 0.2s;
+        }
+        
+        .dot:nth-child(3) {
+          animation-delay: 0.4s;
+        }
+        
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
+        }
+      `}</style>
     </div>
   );
 }
