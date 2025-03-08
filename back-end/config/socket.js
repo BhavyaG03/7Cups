@@ -34,8 +34,9 @@ const initSocket = (server) => {
         socket.emit("error_message", { error: "You are not in this room to send a message." });
         return;
       }
-       // Store the message in the database
-       try {
+
+      // Store the message in the database
+      try {
         const newMessage = new Message(msgData);
         io.to(msgData.room).emit("receive_message", msgData);
       } catch (error) {
@@ -46,46 +47,45 @@ const initSocket = (server) => {
     // ✅ Handle SOS alert
     socket.on("sos", ({ room_id, listener_id, user_id }) => {
       console.log(`SOS triggered in room: ${room_id} by user ${user_id || listener_id}`);
-
-      if (usersInRoom[room_id]) {
-        // Broadcast SOS event to the room
-        io.to(room_id).emit("sos", { room_id, listener_id, user_id });
-      }
+      io.to(room_id).emit("sos", { room_id, listener_id, user_id });
     });
+
     // ✅ Handle report alert
     socket.on("report", ({ room_id, reported_by, reported_person }) => {
       console.log(`Report triggered in room: ${room_id} by user ${reported_by} against ${reported_person}`);
-    
-      if (usersInRoom[room_id]) {
-        // Broadcast report event to the room with correct properties
-        io.to(room_id).emit("report", { room_id, reported_by, reported_person });
-      }
+      io.to(room_id).emit("report", { room_id, reported_by, reported_person });
+    });
+    socket.on("user_typing", ({ room, userName }) => {
+      socket.to(room).emit("user_typing", { userName });
     });
     
 
-    // ✅ Handle chat end and notify both users
-    socket.on("chatEnded", ({ room_id, listener_id, user_id,user_role }) => {
-      console.log(`Chat ended, broadcasting to room: ${room_id}`);
+    // ✅ Handle chat end
+    socket.on("chatEnded", ({ room_id, listener_id, user_id, user_role }) => {
+      console.log(`Chat ended in room: ${room_id}`);
+      io.to(room_id).emit("chatEnded", { room_id, listener_id, user_id, user_role });
 
-      if (usersInRoom[room_id]) {
-        io.to(room_id).emit("chatEnded", { room_id, listener_id, user_id,user_role });
-
-        // Optionally, clear the room from tracking
-        delete usersInRoom[room_id];
-      }
+      // Remove the room from tracking
+      delete usersInRoom[room_id];
     });
 
+    // ✅ Handle user disconnection and remove them from rooms
     socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);
 
       for (let room in usersInRoom) {
-        usersInRoom[room] = usersInRoom[room].filter((id) => id !== socket.id);
-        if (usersInRoom[room].length === 0) {
-          delete usersInRoom[room];
+        if (usersInRoom[room].includes(socket.id)) {
+          usersInRoom[room] = usersInRoom[room].filter((id) => id !== socket.id);
+
+          // Emit user left event to the specific room
+          io.to(room).emit("user_left", { userId: socket.id });
+
+          // If room is empty, delete it
+          if (usersInRoom[room].length === 0) {
+            delete usersInRoom[room];
+          }
         }
       }
-
-      io.emit("user_left", { userId: socket.id });
     });
   });
 };
