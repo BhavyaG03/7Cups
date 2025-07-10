@@ -7,6 +7,7 @@ import Header from "../components/Header";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import { FaUserSecret, FaHeadphones } from "react-icons/fa";
 
 const socket = io(`${import.meta.env.VITE_API_URL}`, { autoConnect: false });
 // Gender-neutral static avatar
@@ -257,16 +258,14 @@ function ChatPage() {
           >
             {msg.side === "left" && (
               <>
-                <img
-                  src={neutralAvatar}
-                  alt="avatar"
-                  className="w-10 h-10 rounded-full mr-3 self-end"
-                />
+                <span className="mr-3 self-end">
+                  <FaHeadphones size={40} className="text-blue-500 bg-white rounded-full p-2 border" />
+                </span>
                 <div className="flex flex-col max-w-xl items-start">
                   <span className="text-xs text-gray-500 mb-1">{listenerName}</span>
                   <div
-                    className="rounded-2xl px-5 py-3 text-base bg-gray-100 text-gray-800"
-                    style={{ fontFamily: 'inherit', fontWeight: 400 }}
+                    className="rounded-xl px-3 py-2 text-sm bg-gray-100 text-gray-800"
+                    style={{ fontFamily: 'inherit', fontWeight: 400, maxWidth: '340px', wordBreak: 'break-word', lineHeight: '1.4' }}
                   >
                     {msg.message}
                   </div>
@@ -278,17 +277,15 @@ function ChatPage() {
                 <div className="flex flex-col max-w-xl items-end">
                   <span className="text-xs text-gray-500 mb-1">Anonymous</span>
                   <div
-                    className="rounded-2xl px-5 py-3 text-base bg-blue-100 text-gray-800"
-                    style={{ fontFamily: 'inherit', fontWeight: 400 }}
+                    className="rounded-xl px-3 py-2 text-sm bg-blue-100 text-gray-800"
+                    style={{ fontFamily: 'inherit', fontWeight: 400, maxWidth: '340px', wordBreak: 'break-word', lineHeight: '1.4' }}
                   >
                     {msg.message}
                   </div>
                 </div>
-                <img
-                  src={neutralAvatar}
-                  alt="avatar"
-                  className="w-10 h-10 rounded-full ml-3 self-end"
-                />
+                <span className="ml-3 self-end">
+                  <FaUserSecret size={40} className="text-gray-400 bg-white rounded-full p-2 border" />
+                </span>
               </>
             )}
           </div>
@@ -297,18 +294,16 @@ function ChatPage() {
           <div className="flex items-center justify-start">
             <div className="flex flex-col max-w-xl items-start">
               <span className="text-xs text-gray-500 mb-1">{listenerName}</span>
-              <div className="rounded-2xl px-5 py-3 text-base bg-gray-100 text-gray-800 flex items-center gap-2">
+              <div className="rounded-xl px-3 py-2 text-sm bg-gray-100 text-gray-800 flex items-center gap-2">
                 typing
                 <span className="dot"></span>
                 <span className="dot"></span>
                 <span className="dot"></span>
               </div>
             </div>
-            <img
-              src={neutralAvatar}
-              alt="avatar"
-              className="w-10 h-10 rounded-full ml-3 self-end"
-            />
+            <span className="ml-3 self-end">
+              <FaHeadphones size={40} className="text-blue-500 bg-white rounded-full p-2 border" />
+            </span>
           </div>
         )}
         <div ref={messagesEndRef} />

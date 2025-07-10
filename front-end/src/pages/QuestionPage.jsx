@@ -201,6 +201,12 @@ function QuestionPage() {
       ) : (
         <div className="p-8 bg-white rounded-lg shadow-md w-96">
           <h2 className="mb-4 text-2xl font-semibold text-center">Available Listeners</h2>
+          <button
+            className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 w-full"
+            onClick={fetchListeners}
+          >
+            Refresh
+          </button>
           <ul>
             {listeners.map((listener) => (
               <li
