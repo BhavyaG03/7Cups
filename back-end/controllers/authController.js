@@ -87,6 +87,21 @@ exports.editUser = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
+    // Atomic update for listener assignment (race condition fix)
+    if (updates.status === 'active' && updates.room_id) {
+      // Only update if status is not already 'active' (i.e., not already assigned)
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: id, status: { $ne: 'active' } },
+        updates,
+        { new: true }
+      );
+      if (!updatedUser) {
+        return res.status(409).json({ message: 'Listener is already active or assigned.' });
+      }
+      return res.status(200).json({ message: 'User updated successfully', updatedUser });
+    }
+
+    // Password update logic (unchanged)
     if (updates.password) {
       const salt = await bcrypt.genSalt(10);
       updates.password = await bcrypt.hash(updates.password, salt);

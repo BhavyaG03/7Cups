@@ -8,8 +8,9 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 
-
 const socket = io(`${import.meta.env.VITE_API_URL}`, { autoConnect: false });
+// Gender-neutral static avatar
+const neutralAvatar = "https://ui-avatars.com/api/?name=User&background=random&rounded=true";
 
 function ChatPage() {
   const [room, setRoom] = useState("");
@@ -19,17 +20,19 @@ function ChatPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState("");
   const [typingTimeout, setTypingTimeout] = useState(null);
-  
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
 
   const user = useSelector((state) => state.user.user);
   const id = user?.user?.id;
   const role = user.role;
-  const userName = user.user.username;//offline
-
+  const userName = user.user.username;
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Determine the other party's name for the header
+  const listenerName = location.state?.listenerName || "Listener";
+  const headerName = role === "user" ? listenerName : "Anonymous";
 
   useEffect(() => {
     socket.connect();
@@ -62,47 +65,33 @@ function ChatPage() {
         new Audio("/discordJoin.mp3").play();
         toast.info("Someone joined the chat");
       });
-      
       socket.on("user_left", ({ userName }) => {
         new Audio("/discordLeave.mp3").play();
         toast.warning("Someone left the chat");
       });
-      
-      // Setup typing indicator listener
       socket.on("user_typing", ({ userName }) => {
-        console.log("Typing event received from:", userName);
         setIsTyping(true);
         setTypingUser(userName);
-        
-        // Clear previous timeout if exists
         if (typingTimeout) clearTimeout(typingTimeout);
-        
-        // Set new timeout to hide typing indicator after 3 seconds
         const timeout = setTimeout(() => {
           setIsTyping(false);
           setTypingUser("");
         }, 3000);
-        
         setTypingTimeout(timeout);
       });
-      
       const handleReceiveMessage = (data) => {
         setMessageList((list) =>
           list.some((msg) => msg.time === data.time && msg.message === data.message) ? list : [...list, data]
         );
         updateStatus("busy");
-        // Hide typing indicator when message is received
         setIsTyping(false);
       };
-      
       const handleRoomFull = (data) => {
-        alert(data.message); 
-        navigate("/user/dashboard"); 
+        alert(data.message);
+        navigate("/user/dashboard");
       };
-  
       socket.on("receive_message", handleReceiveMessage);
       socket.on("room_full", handleRoomFull);
-  
       return () => {
         socket.emit("leave_room", room);
         socket.off("receive_message", handleReceiveMessage);
@@ -111,8 +100,7 @@ function ChatPage() {
       };
     }
   }, [room]);
-  
-  // Auto-scroll to latest message whenever messageList updates
+
   useEffect(() => {
     scrollToBottom();
   }, [messageList, isTyping]);
@@ -124,7 +112,7 @@ function ChatPage() {
   const updateStatus = async (status) => {
     if (role === "listener") {
       try {
-        await axios.put(`${import.meta.env.VITE_API_URL}/api/users/edit/${id}`, { status:status });
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/users/edit/${id}`, { status: status });
       } catch (error) {
         console.error("Error updating status:", error);
       }
@@ -136,35 +124,33 @@ function ChatPage() {
     setIdleTimeout(setTimeout(() => updateStatus("busy"), 45000));
   };
 
-  // Debounced typing notification to prevent spam
   const [typingTimerId, setTypingTimerId] = useState(null);
-  
   const handleTyping = () => {
     if (!room) return;
-    
-    // Clear existing timer
     if (typingTimerId) clearTimeout(typingTimerId);
-    
-    // Set a new timer that will emit typing event
     const timerId = setTimeout(() => {
       const author = role === "user" ? "Anonymous speaker" : userName;
-      console.log("Emitting typing event for:", author, "in room:", room);
       socket.emit("user_typing", { room, userName: author });
-    }, 300); // 300ms debounce
-    
+    }, 300);
     setTypingTimerId(timerId);
   };
 
   const sendMessage = () => {
     if (message.trim() !== "" && room) {
-      const msgData = { room, author: role === "user" ? "Anonymous speaker" : userName, message: message.trim(), time: new Date().toLocaleTimeString() };
+      const msgData = {
+        room,
+        author: role === "user" ? "Anonymous" : listenerName,
+        message: message.trim(),
+        time: new Date().toLocaleTimeString(),
+        isLocal: true,
+        side: role === "user" ? "right" : "left",
+        name: role === "user" ? "Anonymous" : listenerName,
+      };
       socket.emit("send_message", msgData);
-      setMessageList((list) => [...list, { ...msgData, isLocal: true }]);
+      setMessageList((list) => [...list, msgData]);
       setMessage("");
       updateStatus("busy");
       resetIdleTimer();
-      
-      // Clear typing status when sending a message
       if (typingTimerId) {
         clearTimeout(typingTimerId);
         setTypingTimerId(null);
@@ -176,22 +162,19 @@ function ChatPage() {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/chats/${room}`);
       const { room_id, listener_id, user_id } = response.data;
-      let user_role=role;
-      console.log("Chat ended, emitting event to room:", room_id);
-      socket.emit("chatEnded", { room_id, listener_id, user_id,user_role }, room_id);
-      navigate("/review", { state: { room_id, listener_id, user_id,user_role } });
+      let user_role = role;
+      socket.emit("chatEnded", { room_id, listener_id, user_id, user_role }, room_id);
+      navigate("/review", { state: { room_id, listener_id, user_id, user_role } });
     } catch (error) {
       console.error("Error getting chat data:", error);
     }
   };
 
   useEffect(() => {
-    socket.on("chatEnded", ({ room_id, listener_id, user_id,user_role }) => {
-      console.log("Received chatEnded event for room:", room_id);
-      alert(`Chat ended by ${user_role}`)
-      navigate("/review", { state: { room_id, listener_id, user_id,user_role } });
+    socket.on("chatEnded", ({ room_id, listener_id, user_id, user_role }) => {
+      alert(`Chat ended by ${user_role}`);
+      navigate("/review", { state: { room_id, listener_id, user_id, user_role } });
     });
-
     return () => socket.off("chatEnded");
   }, []);
 
@@ -201,15 +184,13 @@ function ChatPage() {
       const { room_id, listener_id, user_id } = response.data;
       let reported_person = "";
       let reported_by = "";
-
       if (role === "user") {
         reported_person = listener_id;
         reported_by = user_id;
-
       } else if (role === "listener") {
         reported_person = user_id;
         reported_by = listener_id;
-        await axios.put(`${import.meta.env.VITE_API_URL}/api/users/logout`,{id:id})
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/users/logout`, { id: id });
       }
       socket.emit("report", { reported_by, reported_person, room_id }, room_id);
       navigate("/report", { state: { reported_by, room_id, reported_person } });
@@ -218,26 +199,20 @@ function ChatPage() {
     }
   };
   useEffect(() => {
-    socket.on("report", ({ reported_person, room_id,reported_by }) => {
+    socket.on("report", ({ reported_person, room_id, reported_by }) => {
       if (reported_person === id) {
-        console.log("ur reported")
         alert("⚠ You have been reported for inappropriate behavior.\n\nOur platform is a safe space for respectful and supportive conversations. If you continue to violate our community guidelines, your account will be automatically banned.");
-          navigate(`/${role}/dashboard`);
+        navigate(`/${role}/dashboard`);
       }
     });
-  
     return () => socket.off("report");
   }, [id, role]);
-  
 
   const sos = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/chats/${room}`);
       const { room_id, listener_id, user_id } = response.data;
-
-      console.log("SOS triggered, emitting event:", { room_id, listener_id, user_id });
       socket.emit("sos", { room_id, listener_id, user_id }, room_id);
-
       if (role === "user") {
         navigate("/pro/therapy");
       }
@@ -251,8 +226,6 @@ function ChatPage() {
 
   useEffect(() => {
     socket.on("sos", ({ room_id, listener_id, user_id }) => {
-      console.log("Received SOS event, redirecting user...", { room_id, listener_id, user_id });
-
       if (role === "user") {
         navigate("/pro/therapy");
       }
@@ -260,11 +233,9 @@ function ChatPage() {
         navigate('/review', { state: { listener_id, room_id, user_id } });
       }
     });
-
     return () => socket.off("sos");
   }, []);
 
-  // Clean up function
   useEffect(() => {
     return () => {
       if (idleTimeout) clearTimeout(idleTimeout);
@@ -274,113 +245,141 @@ function ChatPage() {
   }, [idleTimeout, typingTimeout, typingTimerId]);
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen p-4 text-white bg-gray-400 bg-center bg-cover">
-      <Header></Header>
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick />
-      <div className="relative flex flex-col w-full max-w-5xl gap-3 p-6 shadow-lg bg-slate-600 bg-opacity-80 rounded-xl backdrop-blur-lg">
-        <h2 className="text-4xl font-extrabold text-center text-gray-800">
-          Chat Room: {room || "None"}
-        </h2>
-
-        <div 
-          ref={chatContainerRef} 
-          className="p-4 mb-6 space-y-4 overflow-y-auto bg-gray-200 rounded-lg shadow-md h-96"
-        >
-          {messageList.map((msg, i) => (
-            <div key={i} className={`flex ${msg.isLocal ? "justify-end" : "justify-start"} items-center`}>
-              <div
-                className={`px-3 pt-2 pb-1 flex flex-col rounded-lg min-w-[500px] text-white shadow-lg ${
-                  msg.isLocal ? "bg-green-600" : "bg-blue-600"
-                }`}
-              >
-                <p className="font-semibold">{msg.author}</p>
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm">{msg.message}</p>
-                  <p className="mt-2 text-xs">{msg.time}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-          {isTyping && (
-            <div className="flex items-center justify-start">
-              <div className="px-3 py-2 text-white bg-gray-400 rounded-lg shadow-md">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">typing</span>
-                  <div className="typing-animation">
-                    <span className="dot"></span>
-                    <span className="dot"></span>
-                    <span className="dot"></span>
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <div className="text-3xl font-bold px-12 pt-10 pb-2">{headerName}</div>
+      {/* Chat area */}
+      <div className="flex-1 flex flex-col px-12 pt-4 pb-32 space-y-6">
+        {messageList.map((msg, idx) => (
+          <div
+            key={idx}
+            className={`flex ${msg.side === "left" ? "justify-start" : "justify-end"}`}
+          >
+            {msg.side === "left" && (
+              <>
+                <img
+                  src={neutralAvatar}
+                  alt="avatar"
+                  className="w-10 h-10 rounded-full mr-3 self-end"
+                />
+                <div className="flex flex-col max-w-xl items-start">
+                  <span className="text-xs text-gray-500 mb-1">{listenerName}</span>
+                  <div
+                    className="rounded-2xl px-5 py-3 text-base bg-gray-100 text-gray-800"
+                    style={{ fontFamily: 'inherit', fontWeight: 400 }}
+                  >
+                    {msg.message}
                   </div>
                 </div>
+              </>
+            )}
+            {msg.side === "right" && (
+              <>
+                <div className="flex flex-col max-w-xl items-end">
+                  <span className="text-xs text-gray-500 mb-1">Anonymous</span>
+                  <div
+                    className="rounded-2xl px-5 py-3 text-base bg-blue-100 text-gray-800"
+                    style={{ fontFamily: 'inherit', fontWeight: 400 }}
+                  >
+                    {msg.message}
+                  </div>
+                </div>
+                <img
+                  src={neutralAvatar}
+                  alt="avatar"
+                  className="w-10 h-10 rounded-full ml-3 self-end"
+                />
+              </>
+            )}
+          </div>
+        ))}
+        {isTyping && (
+          <div className="flex items-center justify-start">
+            <div className="flex flex-col max-w-xl items-start">
+              <span className="text-xs text-gray-500 mb-1">{listenerName}</span>
+              <div className="rounded-2xl px-5 py-3 text-base bg-gray-100 text-gray-800 flex items-center gap-2">
+                typing
+                <span className="dot"></span>
+                <span className="dot"></span>
+                <span className="dot"></span>
               </div>
             </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-        <div className="flex items-end w-full h-[55px] space-x-4">
+            <img
+              src={neutralAvatar}
+              alt="avatar"
+              className="w-10 h-10 rounded-full ml-3 self-end"
+            />
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+      {/* Input bar */}
+      <div className="fixed bottom-0 left-0 w-full flex justify-center bg-white pb-8">
+        <div className="flex items-center w-full max-w-2xl bg-gray-100 rounded-2xl px-4 py-3 shadow-md">
           <input
             type="text"
-            placeholder="Type your message..."
+            className="flex-1 bg-transparent outline-none border-none text-base px-2 py-2 placeholder-gray-400"
+            placeholder="Type a message"
             value={message}
-            onChange={(e) => {
+            onChange={e => {
               setMessage(e.target.value);
-              // Call handleTyping on input change
               handleTyping();
             }}
-            onKeyUp={(e) => {
-              if (e.key === "Enter") sendMessage();
-            }}
-            className="flex-1 px-4 py-3 text-black border border-gray-300 rounded-full focus:outline-none"
+            onKeyDown={e => e.key === 'Enter' && sendMessage()}
           />
-          <button onClick={sendMessage} className="h-10 px-6 py-2 text-white bg-blue-600 rounded-full w-28 hover:bg-blue-700">
-            Send
-          </button>
-          <div className="flex flex-col items-start justify-start gap-2">
-            <button onClick={report} className="px-6 py-2 text-white bg-red-600 rounded-full w-28 hover:bg-red-800">
-              Report
-            </button>
-            <button onClick={endChat} className="px-6 py-2 text-white bg-yellow-400 rounded-full w-28 hover:bg-yellow-500">
-              End Chat
-            </button>
-          </div>
           <button
-            onClick={sos}
-            className={`${role === "listener" ? "px-6 py-2 text-white bg-red-900 rounded-full w-28 hover:bg-red-500" : "hidden"}`}
+            className="mx-2 text-gray-400 hover:text-red-600"
+            onClick={report}
+            title="Report"
           >
-            SOS
+            <span role="img" aria-label="flag" style={{ fontSize: 22, color: 'red' }}>🚩</span>
+          </button>
+          <button
+            className={`mx-2 ${role === 'listener' ? 'text-red-600' : 'hidden'}`}
+            onClick={sos}
+            title="SOS"
+          >
+            {/* Red triangle for SOS */}
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="12,3 22,20 2,20" fill="#dc2626" />
+            </svg>
+          </button>
+          <button
+            className="mx-2 text-blue-600 hover:text-blue-800"
+            onClick={endChat}
+            title="End Chat / Feedback"
+          >
+            {/* Feedback icon: chat bubble with checkmark */}
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="12" cy="7" r="4" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="9 11 12 14 15 11" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            </svg>
+          </button>
+          <button
+            className="ml-2 bg-blue-100 text-gray-700 rounded-full px-6 py-2 font-semibold hover:bg-blue-200 transition"
+            onClick={sendMessage}
+          >
+            Send
           </button>
         </div>
       </div>
-      <p className="w-1/2 mt-4 text-sm text-center text-gray-700">
-        ⚠ Please remember: MindFree is not a substitute for therapy or emergency services. Our volunteers are here to listen and support, but they are not mental health professionals. If you are in crisis or need urgent help, please contact a licensed professional or a crisis hotline immediately.
-        <br />
-        <span className="text-[14px]">For your safety, do not share personal identification details during this chat.</span>
-      </p>
-
       <style jsx>{`
-        .typing-animation {
-          display: inline-flex;
-          align-items: center;
-        }
-        
         .dot {
           margin: 0 1px;
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background-color: white;
+          background-color: #888;
           animation: bounce 1.4s infinite;
           opacity: 0.7;
         }
-        
         .dot:nth-child(2) {
           animation-delay: 0.2s;
         }
-        
         .dot:nth-child(3) {
           animation-delay: 0.4s;
         }
-        
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-4px); }
