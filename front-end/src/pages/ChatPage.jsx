@@ -247,66 +247,76 @@ function ChatPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Header */}
-      <div className="text-3xl font-bold px-12 pt-10 pb-2">{headerName}</div>
-      {/* Chat area */}
-      <div className="flex-1 flex flex-col px-12 pt-4 pb-32 space-y-6">
-        {messageList.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${msg.side === "left" ? "justify-start" : "justify-end"}`}
-          >
-            {msg.side === "left" && (
-              <>
-                <span className="mr-3 self-end">
-                  <FaHeadphones size={40} className="text-blue-500 bg-white rounded-full p-2 border" />
-                </span>
-                <div className="flex flex-col max-w-xl items-start">
-                  <span className="text-xs text-gray-500 mb-1">{listenerName}</span>
-                  <div
-                    className="rounded-xl px-3 py-2 text-sm bg-gray-100 text-gray-800"
-                    style={{ fontFamily: 'inherit', fontWeight: 400, maxWidth: '340px', wordBreak: 'break-word', lineHeight: '1.4' }}
-                  >
-                    {msg.message}
+      {/* Cozy image and chat area container */}
+      <div className="max-w-4xl w-full mx-auto">
+        {/* Cozy image at the top */}
+        <img
+          src="/study.png"
+          alt="Cozy study"
+          className="w-full h-56 object-cover rounded-2xl mt-8 mb-6"
+          style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)' }}
+        />
+        {/* Header */}
+        <div className="text-3xl font-bold pt-2 pb-2">{headerName}</div>
+        {/* Chat area */}
+        <div className="flex-1 flex flex-col pt-4 pb-32 space-y-6 w-full">
+          {messageList.map((msg, idx) => (
+            <div
+              key={idx}
+              className={`flex ${msg.side === "left" ? "justify-start" : "justify-end"}`}
+            >
+              {msg.side === "left" && (
+                <>
+                  <span className="mr-3 self-end">
+                    <FaHeadphones size={40} className="text-blue-500 bg-white rounded-full p-2 border" />
+                  </span>
+                  <div className="flex flex-col max-w-xl items-start">
+                    <span className="text-xs text-gray-500 mb-1">{listenerName}</span>
+                    <div
+                      className="rounded-xl px-3 py-2 text-sm bg-[#F5F2F0] text-[#171412]"
+                      style={{ fontFamily: 'inherit', fontWeight: 400, maxWidth: '340px', wordBreak: 'break-word', lineHeight: '1.4' }}
+                    >
+                      {msg.message}
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
-            {msg.side === "right" && (
-              <>
-                <div className="flex flex-col max-w-xl items-end">
-                  <span className="text-xs text-gray-500 mb-1">Anonymous</span>
-                  <div
-                    className="rounded-xl px-3 py-2 text-sm bg-blue-100 text-gray-800"
-                    style={{ fontFamily: 'inherit', fontWeight: 400, maxWidth: '340px', wordBreak: 'break-word', lineHeight: '1.4' }}
-                  >
-                    {msg.message}
+                </>
+              )}
+              {msg.side === "right" && (
+                <>
+                  <div className="flex flex-col max-w-xl items-end">
+                    <span className="text-xs text-gray-500 mb-1">Anonymous</span>
+                    <div
+                      className="rounded-xl px-3 py-2 text-sm bg-[#EB9642] text-[#171412]"
+                      style={{ fontFamily: 'inherit', fontWeight: 400, maxWidth: '340px', wordBreak: 'break-word', lineHeight: '1.4' }}
+                    >
+                      {msg.message}
+                    </div>
                   </div>
-                </div>
-                <span className="ml-3 self-end">
-                  <FaUserSecret size={40} className="text-gray-400 bg-white rounded-full p-2 border" />
-                </span>
-              </>
-            )}
-          </div>
-        ))}
-        {isTyping && (
-          <div className="flex items-center justify-start">
-            <div className="flex flex-col max-w-xl items-start">
-              <span className="text-xs text-gray-500 mb-1">{listenerName}</span>
-              <div className="rounded-xl px-3 py-2 text-sm bg-gray-100 text-gray-800 flex items-center gap-2">
-                typing
-                <span className="dot"></span>
-                <span className="dot"></span>
-                <span className="dot"></span>
-              </div>
+                  <span className="ml-3 self-end">
+                    <FaUserSecret size={40} className="text-gray-400 bg-white rounded-full p-2 border" />
+                  </span>
+                </>
+              )}
             </div>
-            <span className="ml-3 self-end">
-              <FaHeadphones size={40} className="text-blue-500 bg-white rounded-full p-2 border" />
-            </span>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
+          ))}
+          {isTyping && (
+            <div className="flex items-center justify-start">
+              <div className="flex flex-col max-w-xl items-start">
+                <span className="text-xs text-gray-500 mb-1">{listenerName}</span>
+                <div className="rounded-xl px-3 py-2 text-sm bg-gray-100 text-gray-800 flex items-center gap-2">
+                  typing
+                  <span className="dot"></span>
+                  <span className="dot"></span>
+                  <span className="dot"></span>
+                </div>
+              </div>
+              <span className="ml-3 self-end">
+                <FaHeadphones size={40} className="text-blue-500 bg-white rounded-full p-2 border" />
+              </span>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
       {/* Input bar */}
       <div className="fixed bottom-0 left-0 w-full flex justify-center bg-white pb-8">
