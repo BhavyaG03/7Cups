@@ -248,18 +248,20 @@ function ChatPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Cozy image and chat area container */}
-      <div className="max-w-4xl w-full mx-auto">
+      <div className="max-w-5xl w-full mx-auto px-2 sm:px-4">
         {/* Cozy image at the top */}
         <img
           src="/study.png"
           alt="Cozy study"
-          className="w-full h-56 object-cover rounded-2xl mt-8 mb-6"
+          className="w-full h-40 sm:h-56 object-cover rounded-2xl mt-4 sm:mt-8 mb-4 sm:mb-6"
           style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)' }}
         />
         {/* Header */}
-        <div className="text-3xl font-bold pt-2 pb-2">{headerName}</div>
+        <div className="text-2xl sm:text-3xl font-bold pt-1 sm:pt-2 pb-1 sm:pb-2 text-center">
+          {headerName}
+        </div>
         {/* Chat area */}
-        <div className="flex-1 flex flex-col pt-4 pb-32 space-y-6 w-full">
+        <div className="flex-1 flex flex-col pt-2 sm:pt-4 pb-28 sm:pb-32 space-y-4 sm:space-y-6 w-full">
           {messageList.map((msg, idx) => (
             <div
               key={idx}
@@ -267,13 +269,15 @@ function ChatPage() {
             >
               {msg.side === "left" && (
                 <>
-                  <span className="mr-3 self-end">
-                    <FaHeadphones size={40} className="text-blue-500 bg-white rounded-full p-2 border" />
+                  <span className="mr-2 sm:mr-3 self-end">
+                    <span className="bg-white rounded-full border flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 p-1.5 sm:p-2">
+                      <FaHeadphones className="text-blue-500 w-5 h-5 sm:w-7 sm:h-7" />
+                    </span>
                   </span>
-                  <div className="flex flex-col max-w-xl items-start">
-                    <span className="text-xs text-gray-500 mb-1">{listenerName}</span>
+                  <div className="flex flex-col max-w-[80vw] sm:max-w-xl items-start">
+                    <span className="text-xs text-gray-500 mb-0.5 sm:mb-1">{listenerName}</span>
                     <div
-                      className="rounded-xl px-3 py-2 text-sm bg-[#F5F2F0] text-[#171412]"
+                      className="rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-sm bg-[#F5F2F0] text-[#171412]"
                       style={{ fontFamily: 'inherit', fontWeight: 400, maxWidth: '340px', wordBreak: 'break-word', lineHeight: '1.4' }}
                     >
                       {msg.message}
@@ -283,17 +287,19 @@ function ChatPage() {
               )}
               {msg.side === "right" && (
                 <>
-                  <div className="flex flex-col max-w-xl items-end">
-                    <span className="text-xs text-gray-500 mb-1">Anonymous</span>
+                  <div className="flex flex-col max-w-[80vw] sm:max-w-xl items-end">
+                    <span className="text-xs text-gray-500 mb-0.5 sm:mb-1">Anonymous</span>
                     <div
-                      className="rounded-xl px-3 py-2 text-sm bg-[#EB9642] text-[#171412]"
+                      className="rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-sm bg-[#EB9642] text-[#171412]"
                       style={{ fontFamily: 'inherit', fontWeight: 400, maxWidth: '340px', wordBreak: 'break-word', lineHeight: '1.4' }}
                     >
                       {msg.message}
                     </div>
                   </div>
-                  <span className="ml-3 self-end">
-                    <FaUserSecret size={40} className="text-gray-400 bg-white rounded-full p-2 border" />
+                  <span className="ml-2 sm:ml-3 self-end">
+                    <span className="bg-white rounded-full border flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 p-1.5 sm:p-2">
+                      <FaUserSecret className="text-gray-400 w-5 h-5 sm:w-7 sm:h-7" />
+                    </span>
                   </span>
                 </>
               )}
@@ -301,17 +307,19 @@ function ChatPage() {
           ))}
           {isTyping && (
             <div className="flex items-center justify-start">
-              <div className="flex flex-col max-w-xl items-start">
-                <span className="text-xs text-gray-500 mb-1">{listenerName}</span>
-                <div className="rounded-xl px-3 py-2 text-sm bg-gray-100 text-gray-800 flex items-center gap-2">
+              <div className="flex flex-col max-w-[80vw] sm:max-w-xl items-start">
+                <span className="text-xs text-gray-500 mb-0.5 sm:mb-1">{listenerName}</span>
+                <div className="rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-sm bg-gray-100 text-gray-800 flex items-center gap-2">
                   typing
                   <span className="dot"></span>
                   <span className="dot"></span>
                   <span className="dot"></span>
                 </div>
               </div>
-              <span className="ml-3 self-end">
-                <FaHeadphones size={40} className="text-blue-500 bg-white rounded-full p-2 border" />
+              <span className="ml-2 sm:ml-3 self-end">
+                <span className="bg-white rounded-full border flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 p-1.5 sm:p-2">
+                  <FaHeadphones className="text-blue-500 w-5 h-5 sm:w-7 sm:h-7" />
+                </span>
               </span>
             </div>
           )}
@@ -319,11 +327,11 @@ function ChatPage() {
         </div>
       </div>
       {/* Input bar */}
-      <div className="fixed bottom-0 left-0 w-full flex justify-center bg-white pb-8">
-        <div className="flex items-center w-full max-w-2xl bg-gray-100 rounded-2xl px-4 py-3 shadow-md">
+      <div className="fixed bottom-0 left-0 w-full flex justify-center bg-white pb-4 sm:pb-8 px-2 sm:px-0 z-10 border-t border-gray-200 sm:border-t-0">
+        <div className="flex items-center w-full max-w-lg sm:max-w-2xl bg-gray-100 rounded-2xl px-2 sm:px-4 py-2 sm:py-3 shadow-md">
           <input
             type="text"
-            className="flex-1 bg-transparent outline-none border-none text-base px-2 py-2 placeholder-gray-400"
+            className="flex-1 bg-transparent outline-none border-none text-base px-1.5 sm:px-2 py-2 placeholder-gray-400"
             placeholder="Type a message"
             value={message}
             onChange={e => {
@@ -331,38 +339,39 @@ function ChatPage() {
               handleTyping();
             }}
             onKeyDown={e => e.key === 'Enter' && sendMessage()}
+            style={{ fontSize: '1rem' }}
           />
           <button
-            className="mx-2 text-gray-400 hover:text-red-600"
+            className="mx-1 sm:mx-2 text-gray-400 hover:text-red-600"
             onClick={report}
             title="Report"
           >
-            <span role="img" aria-label="flag" style={{ fontSize: 22, color: 'red' }}>🚩</span>
+            <span role="img" aria-label="flag" style={{ fontSize: 20, color: 'red' }}>🚩</span>
           </button>
           <button
-            className={`mx-2 ${role === 'listener' ? 'text-red-600' : 'hidden'}`}
+            className={`mx-1 sm:mx-2 ${role === 'listener' ? 'text-red-600' : 'hidden'}`}
             onClick={sos}
             title="SOS"
           >
             {/* Red triangle for SOS */}
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <polygon points="12,3 22,20 2,20" fill="#dc2626" />
             </svg>
           </button>
           <button
-            className="mx-2 text-blue-600 hover:text-blue-800"
+            className="mx-1 sm:mx-2 text-blue-600 hover:text-blue-800"
             onClick={endChat}
             title="End Chat / Feedback"
           >
             {/* Feedback icon: chat bubble with checkmark */}
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <circle cx="12" cy="7" r="4" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <polyline points="9 11 12 14 15 11" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
             </svg>
           </button>
           <button
-            className="ml-2 bg-blue-100 text-gray-700 rounded-full px-6 py-2 font-semibold hover:bg-blue-200 transition"
+            className="ml-1 sm:ml-2 bg-blue-100 text-gray-700 rounded-full px-4 sm:px-6 py-2 font-semibold hover:bg-blue-200 transition text-sm sm:text-base"
             onClick={sendMessage}
           >
             Send
@@ -388,6 +397,9 @@ function ChatPage() {
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-4px); }
+        }
+        @media (max-width: 640px) {
+          .dot { width: 5px; height: 5px; }
         }
       `}</style>
     </div>
