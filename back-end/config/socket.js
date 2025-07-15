@@ -1,5 +1,6 @@
 const socketIo = require("socket.io");
 const Message = require("../models/Message");
+const profanity = require("profanity-hindi");
 
 let usersInRoom = {};
 
@@ -34,6 +35,9 @@ const initSocket = (server) => {
         socket.emit("error_message", { error: "You are not in this room to send a message." });
         return;
       }
+
+      // Censor profanities in the message
+      msgData.message = profanity.maskBadWords(msgData.message);
 
       // Store the message in the database
       try {

@@ -148,7 +148,6 @@ function ChatPage() {
         name: role === "user" ? "Anonymous" : listenerName,
       };
       socket.emit("send_message", msgData);
-      setMessageList((list) => [...list, msgData]);
       setMessage("");
       updateStatus("busy");
       resetIdleTimer();
