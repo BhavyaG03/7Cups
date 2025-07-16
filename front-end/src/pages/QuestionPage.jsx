@@ -249,7 +249,8 @@ function QuestionPage() {
                           <div className="text-gray-400 text-xs sm:text-sm">{specialty}</div>
                         </div>
                       </div>
-                      <button className="w-auto mx-auto sm:ml-4 px-3 sm:px-3 py-1.5 sm:py-2 bg-gray-100 rounded-lg sm:rounded-full text-gray-700 font-normal text-sm sm:text-base hover:bg-gray-200 transition shadow-sm border border-gray-200 mt-2 sm:mt-0 mb-2 sm:mb-0">Connect</button>
+                      <button onClick={() => handleJoinChat(listener.room_id)}
+ className="w-auto mx-auto sm:ml-4 px-3 sm:px-3 py-1.5 sm:py-2 bg-gray-100 rounded-lg sm:rounded-full text-gray-700 font-normal text-sm sm:text-base hover:bg-gray-200 transition shadow-sm border border-gray-200 mt-2 sm:mt-0 mb-2 sm:mb-0">Connect</button>
                     </div>
                   );
                 })}
