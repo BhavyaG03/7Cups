@@ -10,6 +10,7 @@ const listenerFeedbackRoutes=require("./routes/listenerFeedbackroutes");
 const reportRoutes = require("./routes/reportRoutes");
 const questionRoutes = require("./routes/questionRoutes");
 const deleteRoutes=require("./controllers/messageController")
+const journalRoutes = require("./routes/journalRoutes");
 
 
 const app = express();
@@ -22,6 +23,7 @@ app.use("/api/user/feedback", userFeedbackRoutes);
 app.use("/api/listener/feedback", listenerFeedbackRoutes);
 app.use("/api/responses", questionRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/journal", journalRoutes);
 app.use(deleteRoutes);
 
 

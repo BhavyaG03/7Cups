@@ -13,6 +13,7 @@ import axios from "axios";
 import ReportPage from './pages/ReportPage';
 import ReviewPage from './pages/ReviewPage';
 import SoSPage from './pages/SoSPage';
+import JournalPage from './pages/JournalPage';
 
 
 
@@ -59,6 +60,7 @@ function App() {
         <Route path="/report" element={<ReportPage />} />
         <Route path="/review" element={<ReviewPage />} />
         <Route path="/pro/therapy" element={<SoSPage />} />
+        <Route path="/journal" element={<JournalPage />} />
       </Routes>
     </BrowserRouter>
   );
