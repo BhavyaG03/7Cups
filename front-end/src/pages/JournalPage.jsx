@@ -70,9 +70,9 @@ const JournalPage = () => {
   return (
     <>
       <style>{placeholderStyle}</style>
-      <div className="flex flex-col w-full max-w-[430px] mx-auto px-4 py-8 gap-8 min-h-screen bg-white" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+      <div className="flex flex-col w-full max-w-[430px] lg:max-w-4xl mx-auto px-4 py-8 gap-8 min-h-screen bg-white" style={{ fontFamily: 'Epilogue, sans-serif' }}>
         {/* Prompt */}
-        <div className="text-left w-full flex flex-col gap-4">
+        <div className="text-left w-full flex flex-col gap-4 lg:max-w-2xl lg:mx-auto">
           <div className="font-bold text-lg mb-0">Today's Prompt</div>
           <div className="text-slate-700 font-regular mb-0">{prompt}</div>
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -98,7 +98,7 @@ const JournalPage = () => {
           </form>
         </div>
         {/* Mood */}
-        <div className="flex flex-col gap-3 mt-8">
+        <div className="flex flex-col gap-3 mt-8 lg:max-w-2xl lg:mx-auto">
           <div className="font-bold text-lg mb-0">Mood</div>
           <div className="flex flex-row gap-4">
             {moodOptions.map((m) => (
@@ -117,7 +117,7 @@ const JournalPage = () => {
           </div>
         </div>
         {/* Past Entries */}
-        <div className="w-full flex flex-col gap-4 mt-8">
+        <div className="w-full flex flex-col gap-4 mt-8 lg:max-w-2xl lg:mx-auto">
           <div className="font-bold text-lg mb-0">Past Entries</div>
           <div className="flex flex-col gap-6">
             {pastEntries.length === 0 && (
@@ -128,7 +128,7 @@ const JournalPage = () => {
                 <img
                   src={entryImages[idx % entryImages.length]}
                   alt="journal entry visual"
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-cover lg:max-w-4xl lg:mx-auto"
                   style={{ background: '#e9dcc9' }}
                 />
               </div>
