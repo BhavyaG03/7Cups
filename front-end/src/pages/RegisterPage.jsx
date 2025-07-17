@@ -31,134 +31,100 @@ function RegisterPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full px-4 py-10 bg-gradient-to-tr from-gray-500 to-gray-700">
-      <div className="flex flex-col w-full max-w-5xl px-3 overflow-hidden bg-white rounded-lg shadow-lg md:flex-row">
-        {/* Left Side Image */}
-        <div className="hidden bg-blue-600 md:block md:w-1/2">
-          <img
-            src="https://img.freepik.com/free-vector/mobile-login-concept-illustration_114360-135.jpg?semt=ais_hybrid"
-            alt="Register"
-            className="object-cover w-full h-full"
-          />
-        </div>
-
-        {/* Right Side Form */}
-        <div className="w-full p-8 md:w-1/2">
-          <h2 className="mb-4 text-3xl font-bold text-center text-gray-800">Sign Up</h2>
-          <p className="mb-6 text-center text-gray-500">Create an account to get started.</p>
-
-          <form onSubmit={handleRegister} className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-  {/* Username (Shorter) */}
-  <div className="col-span-1">
-    <label className="block text-sm font-medium text-gray-600">Username</label>
-    <input
-      type="text"
-      placeholder="Username"
-      value={username}
-      onChange={(e) => setUsername(e.target.value)}
-      className="w-full px-4 py-2 mt-1 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-    />
-  </div>
-
-  {/* Email (Longer) */}
-  <div className="col-span-2">
-    <label className="block text-sm font-medium text-gray-600">Email</label>
-    <input
-      type="email"
-      placeholder="Enter email"
-      value={email}
-      onChange={(e) => setEmail(e.target.value)}
-      className="w-full px-4 py-2 mt-1 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-    />
-  </div>
-</div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600">Password</label>
-              <input
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 mt-1 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            {/* Gender & Age */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {/* Gender */}
-              <div>
-                <label className="block text-sm font-medium text-gray-600">Gender</label>
-                <select
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                  className="w-full px-4 py-2 mt-1 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              {/* Age */}
-              <div>
-                <label className="block text-sm font-medium text-gray-600">Age</label>
-                <input
-                  type="number"
-                  placeholder="Enter your age"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  className="w-full px-4 py-2 mt-1 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-
-            {/* Role */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600">Role</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full px-4 py-2 mt-1 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="user">User</option>
-                <option value="listener">Listener</option>
-              </select>
-            </div>
-
-            {/* Register Button */}
-            <button
-              type="submit"
-              className="w-full py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+    <div className="flex flex-col items-center pt-12 pb-5 justify-center min-h-screen bg-white sm:bg-gray-50 px-4" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+      <div className="w-full max-w-md sm:max-w-xl bg-white rounded-2xl sm:shadow-md px-4 py-8 sm:px-8 sm:py-10">
+        <h2 className="text-center text-2xl font-bold mb-8">Register</h2>
+        <form onSubmit={handleRegister} className="space-y-5">
+          {/* Username */}
+          <div>
+            <label className="block text-[16px] font-medium text-gray-900 mb-1">Username</label>
+            <input
+              type="text"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base placeholder:text-[#8B89A6]"
+            />
+          </div>
+          {/* Email */}
+          <div>
+            <label className="block text-[16px] font-medium text-gray-900 mb-1">Email</label>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base placeholder:text-[#8B89A6]"
+            />
+          </div>
+          {/* Password */}
+          <div>
+            <label className="block text-[16px] font-medium text-gray-900 mb-1">Password</label>
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base placeholder:text-[#8B89A6]"
+            />
+          </div>
+          {/* Gender */}
+          <div>
+            <label className="block text-[16px] font-medium text-gray-900 mb-1">Gender</label>
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base text-gray-900"
             >
-              Register
-            </button>
-          </form>
-
-          {/* Login Redirect */}
-          <p className="mt-4 text-sm text-center text-gray-600">
-            Already have an account?{" "}
-            <Link to="/login" className="text-blue-600 hover:underline">
-              Login
-            </Link>
-          </p>
-        </div>
+              <option disabled>Select your gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          {/* Age */}
+          <div>
+            <label className="block text-[16px] font-medium text-gray-900 mb-1">Age</label>
+            <input
+              type="number"
+              placeholder="Enter your age"
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base placeholder:text-[#8B89A6]"
+            />
+          </div>
+          {/* Role */}
+          <div>
+            <label className="block text-[16px] font-medium text-gray-900 mb-1">Role</label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base text-gray-900"
+            >
+              <option disabled>Select your role</option>
+              <option value="user">User</option>
+              <option value="listener">Listener</option>
+            </select>
+          </div>
+          {/* Register Button */}
+          <button
+            type="submit"
+            className="w-full py-3 rounded-xl bg-[#18162B] text-white font-bold text-base mt-5 transition-colors hover:bg-[#23204a] focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          >
+            Register
+          </button>
+        </form>
+        {/* Login Redirect */}
+        <p className="mt-6 text-center text-sm text-[#8B89A6]">
+          Already have an account?
+        </p>
+        <p className="text-center text-sm mb-2">
+          <a href="/login" className="text-[#8B89A6] underline">Login</a>
+        </p>
+        <p className="text-center text-xs text-[#8B89A6] mt-2">
+          By registering, you agree to our Terms of Service and Privacy Policy.
+        </p>
       </div>
-      <div className="w-full max-w-2xl p-3 mt-4 text-xs text-gray-800 rounded-md shadow-md bg-white/10 backdrop-blur-xl">
-  <h3 className="mb-1 text-sm font-semibold text-center text-gray-800">General Disclaimer</h3>
-  <p className="leading-tight text-center">
-    MindFree is an emotional well-being platform offering a safe space for open conversations. 
-    Our volunteers are trained peers, not mental health professionals, and cannot diagnose, 
-    treat, or provide medical advice.
-    <br /><br />
-    This is not a substitute for therapy or emergency services. If you're in crisis or need urgent help, 
-    please contact a licensed professional or a crisis hotline.
-    <br /><br />
-    For your safety, do not share personal identification details on this platform.
-  </p>
-</div>
     </div>
   );
 }
