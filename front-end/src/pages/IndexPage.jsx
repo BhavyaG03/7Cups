@@ -19,8 +19,20 @@ const IndexPage = () => {
 
       {/* Hero Section */}
       <section className="w-full flex flex-col items-center px-2 sm:px-0 mt-6">
-        <div className="w-full max-w-[1100px] rounded-2xl overflow-hidden shadow-lg">
-          <div className="relative w-full h-64 sm:h-96"> {/* h-96 = 384px, close to 400px */}
+        {/* Mobile Hero */}
+        <div className="w-full sm:hidden rounded-2xl overflow-hidden shadow-lg">
+          <div className="relative w-full h-[420px]">
+            <img src="/m.png" alt="Hero" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 bg-black bg-opacity-30">
+              <h1 className="text-3xl font-bold text-white mb-3 drop-shadow-lg">Find Your Support System</h1>
+              <p className="text-white text-base mb-6 max-w-md drop-shadow">Connect with others who understand. Share your experiences, find support, and build meaningful connections within our supportive community.</p>
+              <button className="px-6 py-3 rounded-full bg-[#6C6A8A] text-white font-semibold shadow hover:bg-[#57557a] transition">Explore Community</button>
+            </div>
+          </div>
+        </div>
+        {/* Desktop Hero */}
+        <div className="w-full max-w-[1100px] hidden sm:block rounded-2xl overflow-hidden shadow-lg">
+          <div className="relative w-full h-64 sm:h-96">
             <img src="/valley.png" alt="Mountains" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-center items-center text-center px-4">
               <h1 className="text-2xl sm:text-4xl font-bold text-white mb-3">Find Your Support System</h1>

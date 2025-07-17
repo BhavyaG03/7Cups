@@ -23,6 +23,7 @@ function ChatPage() {
   const [typingTimeout, setTypingTimeout] = useState(null);
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
+  const [showOnboardModal, setShowOnboardModal] = useState(false);
 
   const user = useSelector((state) => state.user.user);
   const id = user?.user?.id;
@@ -244,8 +245,37 @@ function ChatPage() {
     };
   }, [idleTimeout, typingTimeout, typingTimerId]);
 
+  useEffect(() => {
+    if (!localStorage.getItem('chatOnboarded')) {
+      setShowOnboardModal(true);
+      const timer = setTimeout(() => setShowOnboardModal(false), 10000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleCloseModal = () => {
+    setShowOnboardModal(false);
+    localStorage.setItem('chatOnboarded', 'true');
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      {/* Onboarding Modal */}
+      {showOnboardModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-20" onClick={handleCloseModal}>
+          <div className="bg-white rounded-2xl shadow-lg p-6 max-w-xs w-full text-center" onClick={e => e.stopPropagation()}>
+            <h2 className="text-lg font-bold mb-3">Welcome to Chat</h2>
+            <div className="space-y-2 text-base">
+              <div><span role="img" aria-label="flag">🚩</span> <span className="font-medium">Report</span>: Flag user</div>
+              <div><span role="img" aria-label="sos">🔺</span> <span className="font-medium">SOS</span>: Urgent help</div>
+              <div><span role="img" aria-label="end">👤</span> <span className="font-medium">End</span>: Finish chat</div>
+              <div><span className="font-medium">Send</span>: Send message</div>
+            </div>
+            <div className="text-xs text-gray-400 mt-4">This will disappear in 10 seconds</div>
+            <button className="mt-3 px-4 py-1 rounded bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200" onClick={handleCloseModal}>Got it</button>
+          </div>
+        </div>
+      )}
       {/* Cozy image and chat area container */}
       <div className="max-w-5xl w-full mx-auto px-2 sm:px-4">
         {/* Cozy image at the top */}
