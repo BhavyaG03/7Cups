@@ -76,7 +76,10 @@ const UserDashboard = () => {
                 >
                   Start Session
                 </button>
-                <button className="w-full bg-[#e5e8ef] text-gray-900 font-semibold rounded-full px-5 py-3 shadow-sm hover:bg-[#d3e3ed] transition text-base">Journal Entry</button>
+                <button 
+                  className="w-full bg-[#e5e8ef] text-gray-900 font-semibold rounded-full px-5 py-3 shadow-sm hover:bg-[#d3e3ed] transition text-base"
+                  onClick={() => navigate("/journal")}
+                >Journal Entry</button>
               </div>
               {/* Desktop: row buttons at ends */}
               <div className="hidden md:flex flex-row w-full justify-between gap-4">

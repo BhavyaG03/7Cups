@@ -119,7 +119,7 @@ function RegisterPage() {
           Already have an account?
         </p>
         <p className="text-center text-sm mb-2">
-          <a href="/login" className="text-[#8B89A6] underline">Login</a>
+          <Link to="/login" className="text-[#8B89A6] underline">Login</Link>
         </p>
         <p className="text-center text-xs text-[#8B89A6] mt-2">
           By registering, you agree to our Terms of Service and Privacy Policy.

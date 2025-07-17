@@ -161,28 +161,28 @@ function QuestionPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       {!showListeners ? (
-        <>
-          <h1 className="mb-8 text-3xl font-bold">Help us get to know you</h1>
-          <div className="h-2 mb-8 bg-gray-200 rounded-full w-96">
+        <div className="w-full px-2 sm:px-0 flex flex-col items-center min-h-screen bg-gray-100 pb-10">
+          <h1 className="mb-8 text-2xl sm:text-3xl font-bold text-center px-2 pt-8">Help us get to know you</h1>
+          <div className="h-2 mb-10 bg-gray-200 rounded-full w-full max-w-md sm:max-w-xl mx-auto">
             <div
               className="h-full transition-all duration-500 ease-in-out bg-blue-500 rounded-full"
               style={{ width: `${progressBarWidth}%` }}
             ></div>
           </div>
-          <div className="w-full max-w-4xl p-8 bg-white rounded-lg shadow-md">
-            <h2 className="mb-4 text-2xl font-semibold text-center">
+          <div className="w-full max-w-md sm:max-w-2xl mx-auto p-6 sm:p-12 bg-white rounded-xl shadow-md flex flex-col gap-8">
+            <h2 className="mb-6 text-xl sm:text-2xl font-semibold text-center">
               {questions[currentQuestion].question}
             </h2>
             <div
-              className={`grid ${
-                currentQuestion === 0 ? "grid-cols-3 gap-4" : "flex flex-col gap-4 justify-center items-center w-full"
+              className={`${
+                currentQuestion === 0 ? "grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6" : "flex flex-col gap-4 sm:gap-6 justify-center items-center w-full"
               }`}
             >
               {questions[currentQuestion].options &&
                 questions[currentQuestion].options.map((option, index) => (
                   <button
                     key={index}
-                    className={`px-4 max-w-96 w-full py-2 font-bold rounded focus:outline-none transition-all ${
+                    className={`px-4 w-full py-3 font-semibold rounded-xl focus:outline-none transition-all text-sm sm:text-base ${
                       selectedOptions.includes(option) ? "bg-green-500 text-white" : "bg-blue-500 text-white"
                     }`}
                     onClick={() => handleOptionClick(option)}
@@ -193,7 +193,7 @@ function QuestionPage() {
 
               {questions[currentQuestion].multiple && (
                 <button
-                  className="px-4 py-2 font-bold text-white bg-blue-600 rounded hover:bg-blue-800 focus:outline-none"
+                  className="px-4 py-3 font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-800 focus:outline-none w-full mt-2 text-sm sm:text-base"
                   onClick={() => handleNext(selectedOptions)}
                 >
                   Continue
@@ -203,13 +203,13 @@ function QuestionPage() {
               {questions[currentQuestion].type === "text" && (
                 <>
                   <textarea
-                    className="w-full p-2 border border-gray-300 rounded min-w-96"
+                    className="w-full p-4 border border-gray-300 rounded-xl min-h-[100px] text-sm sm:text-base mb-2"
                     placeholder="Type your thoughts here..."
                     value={additionalMessage}
                     onChange={(e) => setAdditionalMessage(e.target.value)}
                   />
                   <button
-                    className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700 focus:outline-none"
+                    className="px-4 py-3 font-bold text-white bg-blue-500 rounded-xl hover:bg-blue-700 focus:outline-none w-full mt-2 text-sm sm:text-base"
                     onClick={() => handleNext(additionalMessage)}
                   >
                     Continue
@@ -218,7 +218,7 @@ function QuestionPage() {
               )}
             </div>
           </div>
-        </>
+        </div>
       ) : (
         <div className="w-full min-h-screen bg-[#f7fafd] flex flex-col items-center px-2 sm:px-0 py-10">
           <div className="w-full max-w-4xl mx-auto px-2 sm:px-0">
@@ -235,25 +235,29 @@ function QuestionPage() {
             <div className="mb-8">
               <h2 className="text-xl font-semibold mb-4">Available Now</h2>
               <div className="flex flex-col gap-6">
-                {listeners.map((listener, idx) => {
-                  // Assign a random specialty and avatar for each listener
-                  const specialty = SPECIALTIES[idx % SPECIALTIES.length];
-                  const avatar = AVATARS[idx % AVATARS.length];
-                  return (
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0" key={listener.room_id || listener.username}>
-                      <div className="flex items-center flex-1">
-                        <img src={avatar} alt={listener.username} className="w-14 h-14 rounded-full object-cover mr-3 sm:mr-4" />
-                        <div>
-                          <div className="font-semibold text-base sm:text-lg">{listener.username}</div>
-                          <div className="text-gray-500 text-xs sm:text-sm">Available for a chat</div>
-                          <div className="text-gray-400 text-xs sm:text-sm">{specialty}</div>
+                {listeners.length === 0 ? (
+                  <div className="text-center text-gray-500 py-8 text-lg font-medium">No listeners are available at the moment. Please check back soon!</div>
+                ) : (
+                  listeners.map((listener, idx) => {
+                    // Assign a random specialty and avatar for each listener
+                    const specialty = SPECIALTIES[idx % SPECIALTIES.length];
+                    const avatar = AVATARS[idx % AVATARS.length];
+                    return (
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0" key={listener.room_id || listener.username}>
+                        <div className="flex items-center flex-1">
+                          <img src={avatar} alt={listener.username} className="w-14 h-14 rounded-full object-cover mr-3 sm:mr-4" />
+                          <div>
+                            <div className="font-semibold text-base sm:text-lg">{listener.username}</div>
+                            <div className="text-gray-500 text-xs sm:text-sm">Available for a chat</div>
+                            <div className="text-gray-400 text-xs sm:text-sm">{specialty}</div>
+                          </div>
                         </div>
-                      </div>
-                      <button onClick={() => handleJoinChat(listener.room_id)}
+                        <button onClick={() => handleJoinChat(listener.room_id)}
  className="w-auto mx-auto sm:ml-4 px-3 sm:px-3 py-1.5 sm:py-2 bg-gray-100 rounded-lg sm:rounded-full text-gray-700 font-normal text-sm sm:text-base hover:bg-gray-200 transition shadow-sm border border-gray-200 mt-2 sm:mt-0 mb-2 sm:mb-0">Connect</button>
-                    </div>
-                  );
-                })}
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
             {/* Explore Listener Categories */}
