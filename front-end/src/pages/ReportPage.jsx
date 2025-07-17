@@ -51,41 +51,32 @@ function ReportPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center">Report User</h2>
-        <p className="mt-2 text-center text-gray-600">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+      <div className="w-full max-w-md sm:p-6 px-3 sm:bg-white sm:rounded-xl sm:shadow-md mx-2">
+        <h2 className="text-2xl font-bold text-center mb-3">Report User</h2>
+        <p className="text-center text-gray-600 mb-6">
           Please select a reason for reporting this user.
         </p>
-
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {reasons.map((reason, index) => (
-            <label key={index} className="flex items-center space-x-2 cursor-pointer">
+            <label
+              key={index}
+              className={`flex items-center px-4 py-3 rounded-xl border transition-colors cursor-pointer text-base font-medium ${selectedReason === reason ? 'bg-gray-100 border-gray-400' : 'bg-white border-gray-200'} focus-within:border-gray-400`}
+            >
               <input
                 type="radio"
                 name="reason"
                 value={reason}
                 checked={selectedReason === reason}
                 onChange={(e) => setSelectedReason(e.target.value)}
-                className="w-5 h-5 text-red-500"
+                className="accent-gray-700 w-5 h-5 mr-3 focus:ring-2 focus:ring-gray-400"
               />
-              <span>{reason}</span>
+              <span className="flex-1">{reason}</span>
             </label>
           ))}
-
-          {selectedReason === "Other" && (
-            <textarea
-              placeholder="Provide more details..."
-              className="w-full p-2 mt-2 border border-gray-300 rounded-md"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-            />
-          )}
-
           <button
             type="submit"
-            className="w-full px-4 py-2 font-semibold text-white bg-red-600 rounded-md hover:bg-red-700"
+            className="w-full py-3 mt-4 rounded-xl bg-gray-500 text-white font-semibold text-lg transition-colors hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400"
           >
             Submit Report
           </button>
