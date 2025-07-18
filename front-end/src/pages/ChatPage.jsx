@@ -13,6 +13,18 @@ const socket = io(`${import.meta.env.VITE_API_URL}`, { autoConnect: false });
 // Gender-neutral static avatar
 const neutralAvatar = "https://ui-avatars.com/api/?name=User&background=random&rounded=true";
 
+// Helper to format last seen
+function formatLastSeen(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000); // seconds
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+  return date.toLocaleString();
+}
+
 function ChatPage() {
   const [room, setRoom] = useState("");
   const [message, setMessage] = useState("");
@@ -24,6 +36,7 @@ function ChatPage() {
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
   const [showOnboardModal, setShowOnboardModal] = useState(false);
+  const [otherStatus, setOtherStatus] = useState({ status: '', lastSeen: '' });
 
   const user = useSelector((state) => state.user.user);
   const id = user?.user?.id;
@@ -85,7 +98,7 @@ function ChatPage() {
         setMessageList((list) =>
           list.some((msg) => msg.time === data.time && msg.message === data.message) ? list : [...list, data]
         );
-        updateStatus("busy");
+        // No busy status, do not update
         setIsTyping(false);
       };
       const handleRoomFull = (data) => {
@@ -112,7 +125,7 @@ function ChatPage() {
   };
 
   const updateStatus = async (status) => {
-    if (role === "listener") {
+    if (role === "listener" && (status === "online" || status === "offline")) {
       try {
         await axios.put(`${import.meta.env.VITE_API_URL}/api/users/edit/${id}`, { status: status });
       } catch (error) {
@@ -121,10 +134,7 @@ function ChatPage() {
     }
   };
 
-  const resetIdleTimer = () => {
-    if (idleTimeout) clearTimeout(idleTimeout);
-    setIdleTimeout(setTimeout(() => updateStatus("busy"), 45000));
-  };
+  // Remove idle timer logic for busy status
 
   const [typingTimerId, setTypingTimerId] = useState(null);
   const handleTyping = () => {
@@ -150,8 +160,7 @@ function ChatPage() {
       };
       socket.emit("send_message", msgData);
       setMessage("");
-      updateStatus("busy");
-      resetIdleTimer();
+      // No busy status, do not update
       if (typingTimerId) {
         clearTimeout(typingTimerId);
         setTypingTimerId(null);
@@ -258,6 +267,54 @@ function ChatPage() {
     localStorage.setItem('chatOnboarded', 'true');
   };
 
+  // Fetch other party's status
+  useEffect(() => {
+    let otherId = null;
+    let pollingRoom = false;
+    let roomPollInterval = null;
+    if (role === 'user') {
+      otherId = location.state?.listenerId || location.state?.listener_id;
+    } else {
+      otherId = location.state?.userId || location.state?.user_id;
+      // If otherId is not set, poll the room endpoint until user_id is available
+      if (!otherId && location.state?.room_id) {
+        pollingRoom = true;
+        const fetchRoomUserId = async () => {
+          try {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/chats/${location.state.room_id}`);
+            if (res.data && res.data.user_id) {
+              otherId = res.data.user_id;
+              setOtherStatus({ status: '', lastSeen: '' }); // Reset status
+              // Now start polling for status
+              const fetchStatus = () => {
+                axios.get(`${import.meta.env.VITE_API_URL}/api/users/status/${otherId}`)
+                  .then(res => setOtherStatus(res.data))
+                  .catch(() => setOtherStatus({ status: '', lastSeen: '' }));
+              };
+              fetchStatus();
+              roomPollInterval && clearInterval(roomPollInterval);
+              roomPollInterval = setInterval(fetchStatus, 5000);
+            }
+          } catch {}
+        };
+        fetchRoomUserId();
+        roomPollInterval = setInterval(fetchRoomUserId, 2000);
+        return () => clearInterval(roomPollInterval);
+      }
+    }
+    console.log("Other party ID for status:", otherId); // Debug log
+    if (otherId) {
+      const fetchStatus = () => {
+        axios.get(`${import.meta.env.VITE_API_URL}/api/users/status/${otherId}`)
+          .then(res => setOtherStatus(res.data))
+          .catch(() => setOtherStatus({ status: '', lastSeen: '' }));
+      };
+      fetchStatus();
+      const interval = setInterval(fetchStatus, 5000); // Poll every 5 seconds
+      return () => clearInterval(interval);
+    }
+  }, [location, role]);
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Onboarding Modal */}
@@ -288,6 +345,13 @@ function ChatPage() {
         {/* Header */}
         <div className="text-2xl sm:text-3xl font-bold pt-1 sm:pt-2 pb-1 sm:pb-2 text-center">
           {headerName}
+        </div>
+        <div className="text-center text-xs text-gray-500 mb-2">
+          {otherStatus.status === 'online'
+            ? 'Online'
+            : otherStatus.lastSeen
+              ? `Last seen ${formatLastSeen(otherStatus.lastSeen)}`
+              : 'Status unknown'}
         </div>
         {/* Chat area */}
         <div className="flex-1 flex flex-col pt-2 sm:pt-4 pb-28 sm:pb-32 space-y-4 sm:space-y-6 w-full">

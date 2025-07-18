@@ -31,9 +31,13 @@ const userSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active", "busy", "offline"],
-      default:"offline",
-      required:true
+      enum: ["online", "offline"],
+      default: "offline",
+      required: true
+    },
+    lastSeen: {
+      type: Date,
+      default: null
     },
     room_id:{
       type: String,

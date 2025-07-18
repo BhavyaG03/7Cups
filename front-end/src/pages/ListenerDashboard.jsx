@@ -21,16 +21,19 @@ const ListenerDashboard = () => {
   
   const handleJoinChat = async () => {
     if (!user?.user?.id) return;
-  
+
     const roomId = generateRoomId();
     try {
-      const res = await axios.put(`${apiUrl}/api/users/edit/${user.user.id}`, { room_id: roomId,status:"active" });
+      const res = await axios.put(`${apiUrl}/api/users/edit/${user.user.id}`, { room_id: roomId, status: "online" });
       await axios.post(`${apiUrl}/api/chats`, {
-                room_id: roomId,
-                listener_id:user.user.id
-              });
+        room_id: roomId,
+        listener_id: user.user.id
+      });
+      // Fetch the room info to get the user_id (speaker)
+      const roomRes = await axios.get(`${apiUrl}/api/chats/${roomId}`);
+      const speakerId = roomRes.data.user_id;
       dispatch(setUser({ ...user, user: { ...user.user, room_id: roomId } }));
-      navigate("/chat");
+      navigate("/chat", { state: { userId: speakerId, listenerId: user.user.id, room_id: roomId } });
     } catch (error) {
       console.error("Error updating room ID:", error);
     }

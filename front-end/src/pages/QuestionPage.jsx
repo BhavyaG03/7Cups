@@ -24,6 +24,18 @@ const AVATARS = [
   "https://randomuser.me/api/portraits/women/12.jpg"
 ];
 
+// Helper to format last seen
+function formatLastSeen(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000); // seconds
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+  return date.toLocaleString();
+}
+
 function QuestionPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [responses, setResponses] = useState({});
@@ -33,6 +45,7 @@ function QuestionPage() {
   const [additionalMessage, setAdditionalMessage] = useState("");
   const user = useSelector((state) => state.user.user);
   const id = user?.user?.id;
+  const [listenerStatuses, setListenerStatuses] = useState({});
 
   const questions = [
     {
@@ -133,16 +146,25 @@ function QuestionPage() {
   const fetchListeners = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/users?status=active&role=listener`
+        `${import.meta.env.VITE_API_URL}/api/users?status=online&role=listener`
       );
       setListeners(response.data);
       setShowListeners(true);
+      // Fetch status for each listener
+      const statuses = {};
+      await Promise.all(response.data.map(async (listener) => {
+        try {
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/status/${listener._id}`);
+          statuses[listener._id] = res.data;
+        } catch {}
+      }));
+      setListenerStatuses(statuses);
     } catch (error) {
       console.error("Error fetching listeners:", error);
     }
   };
 
-  const handleJoinChat = async (listenerRoomId) => {
+  const handleJoinChat = async (listenerRoomId, listenerId) => {
     try {
       if (!id) {
         console.error("User ID not found.");
@@ -152,7 +174,7 @@ function QuestionPage() {
         user_id: id,
       });
 
-      navigate(`/chat`, { state: { room_id: listenerRoomId } });
+      navigate(`/chat`, { state: { room_id: listenerRoomId, listenerId: listenerId, userId: id } });
     } catch (error) {
       console.error("Error updating user room:", error);
     }
@@ -248,11 +270,17 @@ function QuestionPage() {
                           <img src={avatar} alt={listener.username} className="w-14 h-14 rounded-full object-cover mr-3 sm:mr-4" />
                           <div>
                             <div className="font-semibold text-base sm:text-lg">{listener.username}</div>
-                            <div className="text-gray-500 text-xs sm:text-sm">Available for a chat</div>
+                            <div className="text-gray-500 text-xs sm:text-sm">
+                              {listenerStatuses[listener._id]?.status === 'online'
+                                ? 'Online'
+                                : listenerStatuses[listener._id]?.lastSeen
+                                  ? `Last seen ${formatLastSeen(listenerStatuses[listener._id].lastSeen)}`
+                                  : 'Status unknown'}
+                            </div>
                             <div className="text-gray-400 text-xs sm:text-sm">{specialty}</div>
                           </div>
                         </div>
-                        <button onClick={() => handleJoinChat(listener.room_id)}
+                        <button onClick={() => handleJoinChat(listener.room_id, listener._id)}
  className="w-auto mx-auto sm:ml-4 px-3 sm:px-3 py-1.5 sm:py-2 bg-gray-100 rounded-lg sm:rounded-full text-gray-700 font-normal text-sm sm:text-base hover:bg-gray-200 transition shadow-sm border border-gray-200 mt-2 sm:mt-0 mb-2 sm:mb-0">Connect</button>
                       </div>
                     );

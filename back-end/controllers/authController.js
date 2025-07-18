@@ -6,9 +6,9 @@ const User = require('../models/User');
 exports.register = async (req, res) => {
   try {
     const { username, email, password, role,gender,age } = req.body;
-    const status="active";
-    const rating=0;
-    const total_ratings=0;
+    const status = "online";
+    const rating = 0;
+    const total_ratings = 0;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -23,12 +23,13 @@ exports.register = async (req, res) => {
       email,
       password: hashedPassword,
       role: role || "user",
-      status:status,
+      status: status,
       gender,
       age,
-      room_id:null,
-      rating:rating,
-      total_ratings:total_ratings
+      room_id: null,
+      rating: rating,
+      total_ratings: total_ratings,
+      lastSeen: null
     });
 
     await newUser.save();
@@ -54,6 +55,11 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+    // Set user online on login
+    user.status = 'online';
+    user.lastSeen = null;
+    await user.save();
+
     const token = jwt.sign(
       { userId: user._id, username: user.username, role: user.role },
       process.env.JWT_SECRET || 'secretkey',
@@ -70,8 +76,9 @@ exports.login = async (req, res) => {
         status: user.status,
         gender: user.gender,
         age: user.age,
-        room_id:user.room_id,
-        rating:user.rating
+        room_id: user.room_id,
+        rating: user.rating,
+        lastSeen: user.lastSeen
       },
     });
     
@@ -87,24 +94,19 @@ exports.editUser = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
-    // Atomic update for listener assignment (race condition fix)
-    if (updates.status === 'active' && updates.room_id) {
-      // Only update if status is not already 'active' (i.e., not already assigned)
-      const updatedUser = await User.findOneAndUpdate(
-        { _id: id, status: { $ne: 'active' } },
-        updates,
-        { new: true }
-      );
-      if (!updatedUser) {
-        return res.status(409).json({ message: 'Listener is already active or assigned.' });
-      }
-      return res.status(200).json({ message: 'User updated successfully', updatedUser });
-    }
-
+    // Remove atomic update for 'active' assignment, just update fields
     // Password update logic (unchanged)
     if (updates.password) {
       const salt = await bcrypt.genSalt(10);
       updates.password = await bcrypt.hash(updates.password, salt);
+    }
+
+    // If status is being set to offline, update lastSeen
+    if (updates.status === 'offline') {
+      updates.lastSeen = new Date();
+    }
+    if (updates.status === 'online') {
+      updates.lastSeen = null;
     }
 
     const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true });
@@ -165,7 +167,7 @@ exports.logout = async (req, res) => {
 
     const updatedUser = await User.findByIdAndUpdate(
       id,
-      { status: "offline", room_id: null },
+      { status: "offline", room_id: null, lastSeen: new Date() },
       { new: true }
     );
 
@@ -177,6 +179,17 @@ exports.logout = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// Add endpoint to get user status and lastSeen
+exports.getUserStatus = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id, 'status lastSeen');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ status: user.status, lastSeen: user.lastSeen });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err });
   }
 };
 

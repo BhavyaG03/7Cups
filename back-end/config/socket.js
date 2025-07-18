@@ -1,6 +1,7 @@
 const socketIo = require("socket.io");
 const Message = require("../models/Message");
 const profanity = require("profanity-hindi");
+const User = require("../models/User"); // <-- Import User model
 
 let usersInRoom = {};
 
@@ -14,6 +15,16 @@ const initSocket = (server) => {
 
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
+
+    // Expect user to send their userId after connecting
+    socket.on("user_online", async (userId) => {
+      socket.userId = userId;
+      try {
+        await User.findByIdAndUpdate(userId, { status: "online", lastSeen: null });
+      } catch (err) {
+        console.error("Error setting user online:", err);
+      }
+    });
 
     socket.on("join_room", (room) => {
       if (usersInRoom[room] && usersInRoom[room].length >= 2) {
@@ -74,9 +85,16 @@ const initSocket = (server) => {
     });
 
     // ✅ Handle user disconnection and remove them from rooms
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       console.log("User disconnected:", socket.id);
-
+      // Set user offline and update lastSeen
+      if (socket.userId) {
+        try {
+          await User.findByIdAndUpdate(socket.userId, { status: "offline", lastSeen: new Date() });
+        } catch (err) {
+          console.error("Error setting user offline:", err);
+        }
+      }
       for (let room in usersInRoom) {
         if (usersInRoom[room].includes(socket.id)) {
           usersInRoom[room] = usersInRoom[room].filter((id) => id !== socket.id);
