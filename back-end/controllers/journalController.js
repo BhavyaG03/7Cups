@@ -7,11 +7,7 @@ exports.createJournal = async (req, res) => {
     if (!userId || !text || !date) {
       return res.status(400).json({ message: 'User ID, text and date are required.' });
     }
-    // Check if entry for this date already exists for user
-    const existing = await Journal.findOne({ userId, date: new Date(date).setHours(0,0,0,0) });
-    if (existing) {
-      return res.status(409).json({ message: 'Entry for this date already exists.' });
-    }
+    // Remove restriction: allow multiple entries per day
     // Calculate streak
     const yesterday = new Date(date);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -31,7 +27,12 @@ exports.getJournals = async (req, res) => {
   try {
     const userId = req.query.userId || req.body.userId;
     if (!userId) return res.status(400).json({ message: 'User ID is required.' });
-    const entries = await Journal.find({ userId }).sort({ date: -1 });
+    // Only get today's entries, sorted by time ascending
+    const startOfDay = new Date();
+    startOfDay.setHours(0,0,0,0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23,59,59,999);
+    const entries = await Journal.find({ userId, date: { $gte: startOfDay, $lte: endOfDay } }).sort({ date: 1 });
     res.status(200).json(entries);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });

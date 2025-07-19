@@ -24,7 +24,7 @@ const IndexPage = () => {
           <div className="relative w-full h-[420px]">
             <img src="/m.png" alt="Hero" className="w-full h-full object-cover" />
             <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 bg-black bg-opacity-30">
-              <h1 className="text-3xl font-bold text-white mb-3 drop-shadow-lg">Find Your Support System</h1>
+              <h1 className="text-3xl font-bold text-white mb-3 drop-shadow-lg">We are here to hear</h1>
               <p className="text-white text-base mb-6 max-w-md drop-shadow">Connect with others who understand. Share your experiences, find support, and build meaningful connections within our supportive community.</p>
               <button className="px-6 py-3 rounded-full bg-[#6C6A8A] text-white font-semibold shadow hover:bg-[#57557a] transition">Explore Community</button>
             </div>
@@ -35,7 +35,7 @@ const IndexPage = () => {
           <div className="relative w-full h-64 sm:h-96">
             <img src="/valley.png" alt="Mountains" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-center items-center text-center px-4">
-              <h1 className="text-2xl sm:text-4xl font-bold text-white mb-3">Find Your Support System</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-white mb-3">We are here to hear</h1>
               <p className="text-white text-base sm:text-lg mb-6 max-w-2xl">Connect with others who understand your journey, share experiences, gain insights, and build lasting connections in a safe and supportive environment.</p>
               <button className="px-6 py-3 rounded-full bg-white text-[#18162B] font-semibold shadow hover:bg-gray-100 transition">Explore Community</button>
             </div>
