@@ -8,7 +8,7 @@ let usersInRoom = {};
 const initSocket = (server) => {
   const io = socketIo(server, {
     cors: {
-      origin: process.env.CLIENT_URL,
+      origin: [process.env.CLIENT_URL,"https://mindfree.onrender.com"],
       methods: ["GET", "POST"],
     },
   });
