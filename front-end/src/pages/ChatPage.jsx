@@ -85,15 +85,17 @@ function ChatPage() {
         toast.warning("Someone left the chat");
       });
       socket.on("user_typing", ({ userName }) => {
-        setIsTyping(true);
-        setTypingUser(userName);
-        if (typingTimeout) clearTimeout(typingTimeout);
-        const timeout = setTimeout(() => {
-          setIsTyping(false);
-          setTypingUser("");
-        }, 3000);
-        setTypingTimeout(timeout);
-      });
+  // Always show the typing indicator when we receive a typing event
+  // The positioning logic in JSX will handle whether it's left or right
+  setIsTyping(true);
+  setTypingUser(userName);
+  if (typingTimeout) clearTimeout(typingTimeout);
+  const timeout = setTimeout(() => {
+    setIsTyping(false);
+    setTypingUser("");
+  }, 3000);
+  setTypingTimeout(timeout);
+});
       const handleReceiveMessage = (data) => {
         setMessageList((list) =>
           list.some((msg) => msg.time === data.time && msg.message === data.message) ? list : [...list, data]
@@ -316,37 +318,37 @@ function ChatPage() {
   }, [location, role]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="flex flex-col min-h-screen bg-white">
       {/* Onboarding Modal */}
       {showOnboardModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-20" onClick={handleCloseModal}>
-          <div className="bg-white rounded-2xl shadow-lg p-6 max-w-xs w-full text-center" onClick={e => e.stopPropagation()}>
-            <h2 className="text-lg font-bold mb-3">Welcome to Chat</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-20" onClick={handleCloseModal}>
+          <div className="w-full max-w-xs p-6 text-center bg-white shadow-lg rounded-2xl" onClick={e => e.stopPropagation()}>
+            <h2 className="mb-3 text-lg font-bold">Welcome to Chat</h2>
             <div className="space-y-2 text-base">
               <div><span role="img" aria-label="flag">🚩</span> <span className="font-medium">Report</span>: Flag user</div>
               <div><span role="img" aria-label="sos">🔺</span> <span className="font-medium">SOS</span>: Urgent help</div>
               <div><span role="img" aria-label="end">👤</span> <span className="font-medium">End</span>: Finish chat</div>
               <div><span className="font-medium">Send</span>: Send message</div>
             </div>
-            <div className="text-xs text-gray-400 mt-4">This will disappear in 10 seconds</div>
-            <button className="mt-3 px-4 py-1 rounded bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200" onClick={handleCloseModal}>Got it</button>
+            <div className="mt-4 text-xs text-gray-400">This will disappear in 10 seconds</div>
+            <button className="px-4 py-1 mt-3 text-sm font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200" onClick={handleCloseModal}>Got it</button>
           </div>
         </div>
       )}
       {/* Cozy image and chat area container */}
-      <div className="max-w-5xl w-full mx-auto px-2 sm:px-4">
+      <div className="w-full max-w-5xl px-2 mx-auto sm:px-4">
         {/* Cozy image at the top */}
         <img
           src="/study.png"
           alt="Cozy study"
-          className="w-full h-40 sm:h-56 object-cover rounded-2xl mt-4 sm:mt-8 mb-4 sm:mb-6"
+          className="object-cover w-full h-40 mt-4 mb-4 sm:h-56 rounded-2xl sm:mt-8 sm:mb-6"
           style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)' }}
         />
         {/* Header */}
-        <div className="text-2xl sm:text-3xl font-bold pt-1 sm:pt-2 pb-1 sm:pb-2 text-center">
+        <div className="pt-1 pb-1 text-2xl font-bold text-center sm:text-3xl sm:pt-2 sm:pb-2">
           {headerName}
         </div>
-        <div className="text-center text-xs text-gray-500 mb-2">
+        <div className="mb-2 text-xs text-center text-gray-500">
           {otherStatus.status === 'online'
             ? 'Online'
             : otherStatus.lastSeen
@@ -354,7 +356,7 @@ function ChatPage() {
               : 'Status unknown'}
         </div>
         {/* Chat area */}
-        <div className="flex-1 flex flex-col pt-2 sm:pt-4 pb-28 sm:pb-32 space-y-4 sm:space-y-6 w-full">
+        <div className="flex flex-col flex-1 w-full pt-2 space-y-4 sm:pt-4 pb-28 sm:pb-32 sm:space-y-6">
           {messageList.map((msg, idx) => (
             <div
               key={idx}
@@ -362,9 +364,9 @@ function ChatPage() {
             >
               {msg.side === "left" && (
                 <>
-                  <span className="mr-2 sm:mr-3 self-end">
+                  <span className="self-end mr-2 sm:mr-3">
                     <span className="bg-white rounded-full border flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 p-1.5 sm:p-2">
-                      <FaHeadphones className="text-blue-500 w-5 h-5 sm:w-7 sm:h-7" />
+                      <FaHeadphones className="w-5 h-5 text-blue-500 sm:w-7 sm:h-7" />
                     </span>
                   </span>
                   <div className="flex flex-col max-w-[80vw] sm:max-w-xl items-start">
@@ -389,9 +391,9 @@ function ChatPage() {
                       {msg.message}
                     </div>
                   </div>
-                  <span className="ml-2 sm:ml-3 self-end">
+                  <span className="self-end ml-2 sm:ml-3">
                     <span className="bg-white rounded-full border flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 p-1.5 sm:p-2">
-                      <FaUserSecret className="text-gray-400 w-5 h-5 sm:w-7 sm:h-7" />
+                      <FaUserSecret className="w-5 h-5 text-gray-400 sm:w-7 sm:h-7" />
                     </span>
                   </span>
                 </>
@@ -399,29 +401,53 @@ function ChatPage() {
             </div>
           ))}
           {isTyping && (
-            <div className="flex items-center justify-start">
-              <div className="flex flex-col max-w-[80vw] sm:max-w-xl items-start">
-                <span className="text-xs text-gray-500 mb-0.5 sm:mb-1">{listenerName}</span>
-                <div className="rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-sm bg-gray-100 text-gray-800 flex items-center gap-2">
-                  typing
-                  <span className="dot"></span>
-                  <span className="dot"></span>
-                  <span className="dot"></span>
-                </div>
-              </div>
-              <span className="ml-2 sm:ml-3 self-end">
-                <span className="bg-white rounded-full border flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 p-1.5 sm:p-2">
-                  <FaHeadphones className="text-blue-500 w-5 h-5 sm:w-7 sm:h-7" />
-                </span>
-              </span>
-            </div>
-          )}
+  <div className={`flex ${
+    // If Anonymous speaker is typing, show on right side, otherwise left
+    typingUser === "Anonymous speaker" ? "justify-end" : "justify-start"
+  }`}>
+    {/* Show listener avatar on left only when LISTENER is typing */}
+    {typingUser !== "Anonymous speaker" && (
+      <span className="self-end mr-2 sm:mr-3">
+        <span className="bg-white rounded-full border flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 p-1.5 sm:p-2">
+          <FaHeadphones className="w-5 h-5 text-blue-500 sm:w-7 sm:h-7" />
+        </span>
+      </span>
+    )}
+    
+    <div className={`flex flex-col max-w-[80vw] sm:max-w-xl ${
+      typingUser === "Anonymous speaker" ? "items-end" : "items-start"
+    }`}>
+      <span className="text-xs text-gray-500 mb-0.5 sm:mb-1">
+        {typingUser === "Anonymous speaker" ? "Anonymous" : listenerName}
+      </span>
+      <div className={`rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-sm flex items-center gap-2 ${
+        typingUser === "Anonymous speaker"
+          ? "bg-[#EB9642] text-[#171412]" // Anonymous speaker styling (orange)
+          : "bg-[#F5F2F0] text-[#171412]" // Listener styling (light beige)
+      }`}>
+        typing
+        <span className="dot"></span>
+        <span className="dot"></span>
+        <span className="dot"></span>
+      </div>
+    </div>
+    
+    {/* Show speaker avatar on right only when ANONYMOUS SPEAKER is typing */}
+    {typingUser === "Anonymous speaker" && (
+      <span className="self-end ml-2 sm:ml-3">
+        <span className="bg-white rounded-full border flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 p-1.5 sm:p-2">
+          <FaUserSecret className="w-5 h-5 text-gray-400 sm:w-7 sm:h-7" />
+        </span>
+      </span>
+    )}
+  </div>
+)}
           <div ref={messagesEndRef} />
         </div>
       </div>
       {/* Input bar */}
-      <div className="fixed bottom-0 left-0 w-full flex justify-center bg-white pb-4 sm:pb-8 px-2 sm:px-0 z-10 border-t border-gray-200 sm:border-t-0">
-        <div className="flex items-center w-full max-w-lg sm:max-w-2xl bg-gray-100 rounded-2xl px-2 sm:px-4 py-2 sm:py-3 shadow-md">
+      <div className="fixed bottom-0 left-0 z-10 flex justify-center w-full px-2 pb-4 bg-white border-t border-gray-200 sm:pb-8 sm:px-0 sm:border-t-0">
+        <div className="flex items-center w-full max-w-lg px-2 py-2 bg-gray-100 shadow-md sm:max-w-2xl rounded-2xl sm:px-4 sm:py-3">
           <input
             type="text"
             className="flex-1 bg-transparent outline-none border-none text-base px-1.5 sm:px-2 py-2 placeholder-gray-400"
@@ -435,7 +461,7 @@ function ChatPage() {
             style={{ fontSize: '1rem' }}
           />
           <button
-            className="mx-1 sm:mx-2 text-gray-400 hover:text-red-600"
+            className="mx-1 text-gray-400 sm:mx-2 hover:text-red-600"
             onClick={report}
             title="Report"
           >
@@ -452,7 +478,7 @@ function ChatPage() {
             </svg>
           </button>
           <button
-            className="mx-1 sm:mx-2 text-blue-600 hover:text-blue-800"
+            className="mx-1 text-blue-600 sm:mx-2 hover:text-blue-800"
             onClick={endChat}
             title="End Chat / Feedback"
           >
@@ -464,7 +490,7 @@ function ChatPage() {
             </svg>
           </button>
           <button
-            className="ml-1 sm:ml-2 bg-blue-100 text-gray-700 rounded-full px-4 sm:px-6 py-2 font-semibold hover:bg-blue-200 transition text-sm sm:text-base"
+            className="px-4 py-2 ml-1 text-sm font-semibold text-gray-700 transition bg-blue-100 rounded-full sm:ml-2 sm:px-6 hover:bg-blue-200 sm:text-base"
             onClick={sendMessage}
           >
             Send
