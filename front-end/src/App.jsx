@@ -8,19 +8,28 @@ import IndexPage from './pages/IndexPage';
 import QuestionPage from './pages/QuestionPage';
 import UserDashboard from './pages/UserDashboard';
 import ListenerDashboard from './pages/ListenerDashboard';
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import ReportPage from './pages/ReportPage';
 import ReviewPage from './pages/ReviewPage';
 import SoSPage from './pages/SoSPage';
 import JournalPage from './pages/JournalPage';
-
+import { loginSuccess } from './redux/userSlice';
 
 
 function App() {
   const apiUrl = import.meta.env.VITE_API_URL;
   const user = useSelector((state) => state.user?.user);
   const id=user?.user?.id;
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const storedUser = sessionStorage.getItem('user');
+    if (storedUser) {
+      dispatch(loginSuccess(JSON.parse(storedUser)));
+    }
+  }, [dispatch]);
+
   useEffect(() => {
     const handleLogout = async () => {
       if (id) {

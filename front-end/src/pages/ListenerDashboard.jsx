@@ -6,7 +6,11 @@ import axios from "axios";
 
 const ListenerDashboard = () => {
   const apiUrl=import.meta.env.VITE_API_URL
-  const user = useSelector((state) => state.user.user);
+  // Get user from sessionStorage
+  const user = (() => {
+    const stored = sessionStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  })();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -20,20 +24,21 @@ const ListenerDashboard = () => {
   });
   
   const handleJoinChat = async () => {
-    if (!user?.user?.id) return;
+    if (!user?.id) return;
 
     const roomId = generateRoomId();
     try {
-      const res = await axios.put(`${apiUrl}/api/users/edit/${user.user.id}`, { room_id: roomId, status: "online" });
+      const res = await axios.put(`${apiUrl}/api/users/edit/${user.id}`, { room_id: roomId, status: "online" });
       await axios.post(`${apiUrl}/api/chats`, {
         room_id: roomId,
-        listener_id: user.user.id
+        listener_id: user.id
       });
       // Fetch the room info to get the user_id (speaker)
       const roomRes = await axios.get(`${apiUrl}/api/chats/${roomId}`);
       const speakerId = roomRes.data.user_id;
-      dispatch(setUser({ ...user, user: { ...user.user, room_id: roomId } }));
-      navigate("/chat", { state: { userId: speakerId, listenerId: user.user.id, room_id: roomId } });
+      // Update sessionStorage with new room_id
+      sessionStorage.setItem('room_id', roomId);
+      navigate("/chat", { state: { userId: speakerId, listenerId: user.id, room_id: roomId } });
     } catch (error) {
       console.error("Error updating room ID:", error);
     }

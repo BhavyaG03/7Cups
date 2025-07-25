@@ -1,10 +1,13 @@
 import React from "react";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const UserDashboard = () => {
-  const user = useSelector((state) => state.user.user);
-  const username = user?.user?.username || "User";
+  // Get user from sessionStorage
+  const user = (() => {
+    const stored = sessionStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  })();
+  const username = user?.username || "User";
   const navigate = useNavigate();
 
   // Start Session logic (replace with your actual logic if needed)

@@ -26,9 +26,15 @@ function formatLastSeen(dateString) {
 }
 
 function ChatPage() {
-  const [room, setRoom] = useState("");
-  const [message, setMessage] = useState("");
+  const location = useLocation();
   const [messageList, setMessageList] = useState([]);
+  // Use sessionStorage for user and room context
+  const [user, setUser] = useState(() => {
+    const stored = sessionStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [room, setRoom] = useState(() => sessionStorage.getItem('room_id') || (location.state?.room_id || ""));
+  const [message, setMessage] = useState("");
   const [idleTimeout, setIdleTimeout] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState("");
@@ -37,12 +43,12 @@ function ChatPage() {
   const chatContainerRef = useRef(null);
   const [showOnboardModal, setShowOnboardModal] = useState(false);
   const [otherStatus, setOtherStatus] = useState({ status: '', lastSeen: '' });
-
-  const user = useSelector((state) => state.user.user);
-  const id = user?.user?.id;
-  const role = user.role;
-  const userName = user.user.username;
-  const location = useLocation();
+  const socketRef = useRef(null);
+  const hasJoinedRoom = useRef(false);
+  // Use user?.id, user?.username, user?.role, etc. everywhere below
+  const id = user?.id;
+  const role = user?.role;
+  const userName = user?.username;
   const navigate = useNavigate();
 
   // Determine the other party's name for the header
@@ -50,73 +56,67 @@ function ChatPage() {
   const headerName = role === "user" ? listenerName : "Anonymous";
 
   useEffect(() => {
-    socket.connect();
-    return () => socket.disconnect();
-  }, []);
+    if (user && room) {
+      socketRef.current = io(`${import.meta.env.VITE_API_URL}`, { autoConnect: true });
+      // Only emit join_room once
+      if (!hasJoinedRoom.current) {
+        socketRef.current.emit("join_room", room);
+        hasJoinedRoom.current = true;
+      }
 
-  useEffect(() => {
-    if (role === "user") {
-      setRoom(location.state.room_id);
-    } else {
-      const fetchUserData = async () => {
-        try {
-          const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/${id}`);
-          const userData = response.data;
-          if (userData.role === "listener" && userData.room_id) {
-            setRoom(userData.room_id);
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      };
-      fetchUserData();
-    }
-  }, [location, id, role]);
-
-  useEffect(() => {
-    if (room) {
-      socket.emit("join_room", room);
-      socket.on("user_joined", ({ userName }) => {
+      // Attach all socket event handlers only once
+      const handleUserJoined = ({ userName }) => {
         new Audio("/discordJoin.mp3").play();
         toast.info("Someone joined the chat");
-      });
-      socket.on("user_left", ({ userName }) => {
+      };
+      const handleUserLeft = ({ userName }) => {
         new Audio("/discordLeave.mp3").play();
         toast.warning("Someone left the chat");
-      });
-      socket.on("user_typing", ({ userName }) => {
-  // Always show the typing indicator when we receive a typing event
-  // The positioning logic in JSX will handle whether it's left or right
-  setIsTyping(true);
-  setTypingUser(userName);
-  if (typingTimeout) clearTimeout(typingTimeout);
-  const timeout = setTimeout(() => {
-    setIsTyping(false);
-    setTypingUser("");
-  }, 3000);
-  setTypingTimeout(timeout);
-});
+      };
+      const handleUserTyping = ({ userName }) => {
+        setIsTyping(true);
+        setTypingUser(userName);
+        if (typingTimeout) clearTimeout(typingTimeout);
+        const timeout = setTimeout(() => {
+          setIsTyping(false);
+          setTypingUser("");
+        }, 3000);
+        setTypingTimeout(timeout);
+      };
       const handleReceiveMessage = (data) => {
         setMessageList((list) =>
           list.some((msg) => msg.time === data.time && msg.message === data.message) ? list : [...list, data]
         );
-        // No busy status, do not update
         setIsTyping(false);
       };
       const handleRoomFull = (data) => {
-        alert(data.message);
-        navigate("/user/dashboard");
+        // Only show error if not already in the room
+        if (!hasJoinedRoom.current) {
+          alert(data.message);
+          navigate("/user/dashboard");
+        }
       };
-      socket.on("receive_message", handleReceiveMessage);
-      socket.on("room_full", handleRoomFull);
+
+      socketRef.current.on("user_joined", handleUserJoined);
+      socketRef.current.on("user_left", handleUserLeft);
+      socketRef.current.on("user_typing", handleUserTyping);
+      socketRef.current.on("receive_message", handleReceiveMessage);
+      socketRef.current.on("room_full", handleRoomFull);
+
       return () => {
-        socket.emit("leave_room", room);
-        socket.off("receive_message", handleReceiveMessage);
-        socket.off("room_full", handleRoomFull);
-        socket.off("user_typing");
+        if (socketRef.current) {
+          socketRef.current.off("user_joined", handleUserJoined);
+          socketRef.current.off("user_left", handleUserLeft);
+          socketRef.current.off("user_typing", handleUserTyping);
+          socketRef.current.off("receive_message", handleReceiveMessage);
+          socketRef.current.off("room_full", handleRoomFull);
+          socketRef.current.disconnect();
+          socketRef.current = null;
+        }
+        hasJoinedRoom.current = false;
       };
     }
-  }, [room]);
+  }, [user, room]);
 
   useEffect(() => {
     scrollToBottom();
@@ -140,17 +140,17 @@ function ChatPage() {
 
   const [typingTimerId, setTypingTimerId] = useState(null);
   const handleTyping = () => {
-    if (!room) return;
+    if (!room || !socketRef.current) return;
     if (typingTimerId) clearTimeout(typingTimerId);
     const timerId = setTimeout(() => {
       const author = role === "user" ? "Anonymous speaker" : userName;
-      socket.emit("user_typing", { room, userName: author });
+      socketRef.current.emit("user_typing", { room, userName: author });
     }, 300);
     setTypingTimerId(timerId);
   };
 
   const sendMessage = () => {
-    if (message.trim() !== "" && room) {
+    if (message.trim() !== "" && room && socketRef.current) {
       const msgData = {
         room,
         author: role === "user" ? "Anonymous" : listenerName,
@@ -160,9 +160,8 @@ function ChatPage() {
         side: role === "user" ? "right" : "left",
         name: role === "user" ? "Anonymous" : listenerName,
       };
-      socket.emit("send_message", msgData);
+      socketRef.current.emit("send_message", msgData);
       setMessage("");
-      // No busy status, do not update
       if (typingTimerId) {
         clearTimeout(typingTimerId);
         setTypingTimerId(null);
@@ -170,12 +169,16 @@ function ChatPage() {
     }
   };
 
+  // On chat end or logout, clear room_id from sessionStorage
   const endChat = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/chats/${room}`);
       const { room_id, listener_id, user_id } = response.data;
-      let user_role = role;
-      socket.emit("chatEnded", { room_id, listener_id, user_id, user_role }, room_id);
+      let user_role = user?.role;
+      if (socketRef.current) {
+        socketRef.current.emit("chatEnded", { room_id, listener_id, user_id, user_role }, room_id);
+      }
+      sessionStorage.removeItem('room_id');
       navigate("/review", { state: { room_id, listener_id, user_id, user_role } });
     } catch (error) {
       console.error("Error getting chat data:", error);
@@ -183,11 +186,17 @@ function ChatPage() {
   };
 
   useEffect(() => {
-    socket.on("chatEnded", ({ room_id, listener_id, user_id, user_role }) => {
-      alert(`Chat ended by ${user_role}`);
-      navigate("/review", { state: { room_id, listener_id, user_id, user_role } });
-    });
-    return () => socket.off("chatEnded");
+    if (socketRef.current) {
+      socketRef.current.on("chatEnded", ({ room_id, listener_id, user_id, user_role }) => {
+        alert(`Chat ended by ${user_role}`);
+        navigate("/review", { state: { room_id, listener_id, user_id, user_role } });
+      });
+    }
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off("chatEnded");
+      }
+    };
   }, []);
 
   const report = async () => {
@@ -204,27 +213,37 @@ function ChatPage() {
         reported_by = listener_id;
         await axios.put(`${import.meta.env.VITE_API_URL}/api/users/logout`, { id: id });
       }
-      socket.emit("report", { reported_by, reported_person, room_id }, room_id);
+      if (socketRef.current) {
+        socketRef.current.emit("report", { reported_by, reported_person, room_id }, room_id);
+      }
       navigate("/report", { state: { reported_by, room_id, reported_person } });
     } catch (error) {
       console.error("Error reporting user:", error);
     }
   };
   useEffect(() => {
-    socket.on("report", ({ reported_person, room_id, reported_by }) => {
-      if (reported_person === id) {
-        alert("⚠ You have been reported for inappropriate behavior.\n\nOur platform is a safe space for respectful and supportive conversations. If you continue to violate our community guidelines, your account will be automatically banned.");
-        navigate(`/${role}/dashboard`);
+    if (socketRef.current) {
+      socketRef.current.on("report", ({ reported_person, room_id, reported_by }) => {
+        if (user?.id && reported_person === user.id) {
+          alert("⚠ You have been reported for inappropriate behavior.\n\nOur platform is a safe space for respectful and supportive conversations. If you continue to violate our community guidelines, your account will be automatically banned.");
+          navigate(`/${user?.role}/dashboard`);
+        }
+      });
+    }
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off("report");
       }
-    });
-    return () => socket.off("report");
-  }, [id, role]);
+    };
+  }, [user?.id, user?.role]);
 
   const sos = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/chats/${room}`);
       const { room_id, listener_id, user_id } = response.data;
-      socket.emit("sos", { room_id, listener_id, user_id }, room_id);
+      if (socketRef.current) {
+        socketRef.current.emit("sos", { room_id, listener_id, user_id }, room_id);
+      }
       if (role === "user") {
         navigate("/pro/therapy");
       }
@@ -237,16 +256,22 @@ function ChatPage() {
   };
 
   useEffect(() => {
-    socket.on("sos", ({ room_id, listener_id, user_id }) => {
-      if (role === "user") {
-        navigate("/pro/therapy");
+    if (socketRef.current) {
+      socketRef.current.on("sos", ({ room_id, listener_id, user_id }) => {
+        if (user?.role === "user") {
+          navigate("/pro/therapy");
+        }
+        if (user?.role === "listener") {
+          navigate('/review', { state: { listener_id, room_id, user_id } });
+        }
+      });
+    }
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off("sos");
       }
-      if (role === "listener") {
-        navigate('/review', { state: { listener_id, room_id, user_id } });
-      }
-    });
-    return () => socket.off("sos");
-  }, []);
+    };
+  }, [user?.role]);
 
   useEffect(() => {
     return () => {

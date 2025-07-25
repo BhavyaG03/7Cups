@@ -1,24 +1,20 @@
 import React from 'react'
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from 'react-router-dom';
+import { logout } from '../redux/userSlice';
 
 
 const Header = () => {
   const navigate=useNavigate()
+  const dispatch = useDispatch();
+
   const handleLogout = async () => {
-    if (id) {
-      try {
-        await fetch(`${import.meta.env.VITE_API_URL}/api/users/logout`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id }),
-        });
-        console.log("logged out")
-        navigate('/login')
-      } catch (error) {
-        console.error("Error logging out:", error);
-      }
-    }
+    // Clear sessionStorage on logout
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('room_id');
+    dispatch(logout());
+    navigate('/login')
   };
   const user = useSelector((state) => state.user.user);
   const role=user.role

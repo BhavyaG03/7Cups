@@ -43,8 +43,14 @@ function QuestionPage() {
   const [showListeners, setShowListeners] = useState(false);
   const [listeners, setListeners] = useState([]);
   const [additionalMessage, setAdditionalMessage] = useState("");
-  const user = useSelector((state) => state.user.user);
-  const id = user?.user?.id;
+  // Replace useSelector with sessionStorage
+  const user = (() => {
+    const stored = sessionStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  })();
+  const id = user?.id;
+  const username = user?.username;
+  const role = user?.role;
   const [listenerStatuses, setListenerStatuses] = useState({});
 
   const questions = [

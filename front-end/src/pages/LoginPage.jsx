@@ -18,8 +18,14 @@ function LoginPage() {
     try {
       const res = await axios.post(`${apiUrl}/api/users/login`, { email, password });
 
-      // Save user data to Redux
-      dispatch(loginSuccess(res.data));
+      // Save user and token to sessionStorage for per-tab persistence
+      sessionStorage.setItem('user', JSON.stringify(res.data.user));
+      sessionStorage.setItem('token', res.data.token);
+      if (res.data.user.room_id) {
+        sessionStorage.setItem('room_id', res.data.user.room_id);
+      } else {
+        sessionStorage.removeItem('room_id');
+      }
       // Navigate based on user role
       if (res.data.role === "listener") {
         navigate("/listener/dashboard");

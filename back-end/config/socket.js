@@ -26,19 +26,32 @@ const initSocket = (server) => {
       }
     });
 
-    socket.on("join_room", (room) => {
+    socket.on("join_room", (data) => {
+      // Accept both string (room) and object ({ room, userId })
+      let room, userId;
+      if (typeof data === 'string') {
+        room = data;
+        userId = socket.userId || null;
+      } else {
+        room = data.room;
+        userId = data.userId || socket.userId || null;
+      }
+      console.log("[SOCKET] join_room called for room:", room, "userId:", userId, "socketId:", socket.id, "Current users before:", usersInRoom[room]);
       if (usersInRoom[room] && usersInRoom[room].length >= 2) {
+        console.log("[SOCKET] Room full for room:", room, "userId:", userId, "socketId:", socket.id, "Current users:", usersInRoom[room]);
         socket.emit("room_full", { message: "This room is full. You cannot join." });
         return;
       }
 
       socket.join(room);
-      console.log(`User with ID: ${socket.id} joined room: ${room}`);
-
       usersInRoom[room] = usersInRoom[room] || [];
-      usersInRoom[room].push(socket.id);
-
+      if (!usersInRoom[room].includes(socket.id)) {
+        usersInRoom[room].push(socket.id);
+      }
+      console.log("[SOCKET] User joined room:", room, "userId:", userId, "socketId:", socket.id, "Current users after:", usersInRoom[room]);
       io.to(room).emit("user_joined", { userId: socket.id });
+      // Debug: Show all users in the room after join
+      console.log(`[SOCKET] Users in room ${room}:`, usersInRoom[room]);
     });
 
     socket.on("send_message", async (msgData) => {
