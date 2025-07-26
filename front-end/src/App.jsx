@@ -20,7 +20,10 @@ import { loginSuccess } from './redux/userSlice';
 function App() {
   const apiUrl = import.meta.env.VITE_API_URL;
   const user = useSelector((state) => state.user?.user);
-  const id=user?.user?.id;
+  const id = (() => {
+    const stored = sessionStorage.getItem('user');
+    return stored ? JSON.parse(stored).id : null;
+  })();
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -32,7 +35,8 @@ function App() {
 
   useEffect(() => {
     const handleLogout = async () => {
-      if (id) {
+      const roomId = sessionStorage.getItem('room_id');
+      if (id && roomId) {
         try {
           await fetch(`${apiUrl}/api/users/logout`, {
             method: "PUT",
@@ -44,6 +48,7 @@ function App() {
           console.error("Error logging out:", error);
         }
       }
+      // Optionally: clear sessionStorage here if you want
     };
 
     window.addEventListener("beforeunload", handleLogout);

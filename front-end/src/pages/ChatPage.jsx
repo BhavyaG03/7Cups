@@ -50,6 +50,8 @@ function ChatPage() {
   const role = user?.role;
   const userName = user?.username;
   const navigate = useNavigate();
+  // Track if listener has sent their first message
+  const hasSetBusy = useRef(false);
 
   // Determine the other party's name for the header
   const listenerName = location.state?.listenerName || "Listener";
@@ -149,7 +151,7 @@ function ChatPage() {
     setTypingTimerId(timerId);
   };
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (message.trim() !== "" && room && socketRef.current) {
       const msgData = {
         room,
@@ -161,6 +163,11 @@ function ChatPage() {
         name: role === "user" ? "Anonymous" : listenerName,
       };
       socketRef.current.emit("send_message", msgData);
+      // If listener, set status to busy only on first message
+      if (user?.role === "listener" && !hasSetBusy.current) {
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/users/edit/${user.id}`, { status: "busy" });
+        hasSetBusy.current = true;
+      }
       setMessage("");
       if (typingTimerId) {
         clearTimeout(typingTimerId);
@@ -178,6 +185,11 @@ function ChatPage() {
       if (socketRef.current) {
         socketRef.current.emit("chatEnded", { room_id, listener_id, user_id, user_role }, room_id);
       }
+      // Always set listener status to offline and clear room_id when chat ends
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/users/edit/${listener_id}`, { 
+        status: "offline", 
+        room_id: null 
+      });
       sessionStorage.removeItem('room_id');
       navigate("/review", { state: { room_id, listener_id, user_id, user_role } });
     } catch (error) {
@@ -187,8 +199,20 @@ function ChatPage() {
 
   useEffect(() => {
     if (socketRef.current) {
-      socketRef.current.on("chatEnded", ({ room_id, listener_id, user_id, user_role }) => {
+      socketRef.current.on("chatEnded", async ({ room_id, listener_id, user_id, user_role }) => {
         alert(`Chat ended by ${user_role}`);
+        // If current user is the listener, set status to offline and clear room_id
+        if (user?.role === "listener") {
+          try {
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/users/edit/${user.id}`, { 
+              status: "offline", 
+              room_id: null 
+            });
+          } catch (error) {
+            console.error("Error updating listener status:", error);
+          }
+        }
+        sessionStorage.removeItem('room_id');
         navigate("/review", { state: { room_id, listener_id, user_id, user_role } });
       });
     }
@@ -197,7 +221,7 @@ function ChatPage() {
         socketRef.current.off("chatEnded");
       }
     };
-  }, []);
+  }, [user?.role, user?.id]);
 
   const report = async () => {
     try {
@@ -374,11 +398,13 @@ function ChatPage() {
           {headerName}
         </div>
         <div className="mb-2 text-xs text-center text-gray-500">
-          {otherStatus.status === 'online'
-            ? 'Online'
-            : otherStatus.lastSeen
-              ? `Last seen ${formatLastSeen(otherStatus.lastSeen)}`
-              : 'Status unknown'}
+          {otherStatus.status === 'busy'
+            ? 'Busy'
+            : otherStatus.status === 'online'
+              ? 'Online'
+              : otherStatus.lastSeen
+                ? `Last seen ${formatLastSeen(otherStatus.lastSeen)}`
+                : 'Status unknown'}
         </div>
         {/* Chat area */}
         <div className="flex flex-col flex-1 w-full pt-2 space-y-4 sm:pt-4 pb-28 sm:pb-32 sm:space-y-6">
@@ -522,7 +548,7 @@ function ChatPage() {
           </button>
         </div>
       </div>
-      <style jsx>{`
+      <style>{`
         .dot {
           margin: 0 1px;
           width: 6px;

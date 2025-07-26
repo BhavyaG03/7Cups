@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 import axios from "axios";
 
 const ReviewPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const user = useSelector((state) => state.user.user);
-  const role = user.role;
+  const user = (() => {
+    const stored = sessionStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  })();
+  const role = user?.role;
   const { listener_id, user_id, room_id } = location.state;
 
   const [experience, setExperience] = useState(5);

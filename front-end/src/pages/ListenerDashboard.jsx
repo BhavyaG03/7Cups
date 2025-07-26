@@ -28,7 +28,8 @@ const ListenerDashboard = () => {
 
     const roomId = generateRoomId();
     try {
-      const res = await axios.put(`${apiUrl}/api/users/edit/${user.id}`, { room_id: roomId, status: "online" });
+      // Set status to online when starting session
+      await axios.put(`${apiUrl}/api/users/edit/${user.id}`, { room_id: roomId, status: "online" });
       await axios.post(`${apiUrl}/api/chats`, {
         room_id: roomId,
         listener_id: user.id
@@ -38,6 +39,7 @@ const ListenerDashboard = () => {
       const speakerId = roomRes.data.user_id;
       // Update sessionStorage with new room_id
       sessionStorage.setItem('room_id', roomId);
+      // Do NOT set status to busy here
       navigate("/chat", { state: { userId: speakerId, listenerId: user.id, room_id: roomId } });
     } catch (error) {
       console.error("Error updating room ID:", error);

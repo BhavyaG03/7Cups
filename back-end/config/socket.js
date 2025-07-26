@@ -100,10 +100,10 @@ const initSocket = (server) => {
     // ✅ Handle user disconnection and remove them from rooms
     socket.on("disconnect", async () => {
       console.log("User disconnected:", socket.id);
-      // Set user offline and update lastSeen
+      // Set user offline and update lastSeen, and clear room_id
       if (socket.userId) {
         try {
-          await User.findByIdAndUpdate(socket.userId, { status: "offline", lastSeen: new Date() });
+          await User.findByIdAndUpdate(socket.userId, { status: "offline", room_id: null, lastSeen: new Date() });
         } catch (err) {
           console.error("Error setting user offline:", err);
         }
