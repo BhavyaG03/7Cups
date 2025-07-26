@@ -25,8 +25,8 @@ const IndexPage = () => {
             <img src="/m.png" alt="Hero" className="w-full h-full object-cover" />
             <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 bg-black bg-opacity-30">
               <h1 className="text-3xl font-bold text-white mb-3 drop-shadow-lg">We are here to hear</h1>
-              <p className="text-white text-base mb-6 max-w-md drop-shadow">Connect with others who understand. Share your experiences, find support, and build meaningful connections within our supportive community.</p>
-              <button className="px-6 py-3 rounded-full bg-[#6C6A8A] text-white font-semibold shadow hover:bg-[#57557a] transition">Explore Community</button>
+              <p className="text-white text-base mb-6 max-w-md drop-shadow">Connect with empathetic, trained individuals who are here to listen to what's disturbing you and help you feel better.</p>
+              <Link to="/login"><button className="px-6 py-3 rounded-full bg-[#6C6A8A] text-white font-semibold shadow hover:bg-[#57557a] transition">Get Started</button></Link>
             </div>
           </div>
         </div>
@@ -36,8 +36,8 @@ const IndexPage = () => {
             <img src="/valley.png" alt="Mountains" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-center items-center text-center px-4">
               <h1 className="text-2xl sm:text-4xl font-bold text-white mb-3">We are here to hear</h1>
-              <p className="text-white text-base sm:text-lg mb-6 max-w-2xl">Connect with others who understand your journey, share experiences, gain insights, and build lasting connections in a safe and supportive environment.</p>
-              <button className="px-6 py-3 rounded-full bg-white text-[#18162B] font-semibold shadow hover:bg-gray-100 transition">Explore Community</button>
+              <p className="text-white text-base sm:text-lg mb-6 max-w-2xl">Connect with empathetic, trained individuals who are here to listen to what's disturbing you and help you feel better.</p>
+              <Link to="/login"><button className="px-6 py-3 rounded-full bg-white text-[#18162B] font-semibold shadow hover:bg-gray-100 transition">Get Started</button></Link>
             </div>
           </div>
         </div>
@@ -46,23 +46,24 @@ const IndexPage = () => {
       {/* Why Choose Section */}
       <section className="w-full max-w-[1100px] mx-auto mt-12 px-4">
         <h2 className="text-2xl sm:text-3xl font-bold mb-2">Why Choose Mindfree?</h2>
-        <p className="text-gray-600 mb-8">Our platform is designed to foster genuine connections and provide valuable support for your mental health journey.</p>
+        <p className="text-gray-600 mb-8">Something on your mind that is bothering you?
+        You know, talking to someone about what's bothering you helps feel more calm and centered.</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white border rounded-xl p-5 flex flex-col items-start shadow-sm">
+          <Link to="/login"><div className="bg-white border rounded-xl p-5 flex flex-col items-start shadow-sm">
             <div className="mb-2"><span className=""><PiUsers size={24}></PiUsers></span></div>
             <div className="font-semibold mb-1">Connect with Peers</div>
             <div className="text-gray-500 text-sm">Join groups based on shared experiences and interests. Find others who understand what you're going through.</div>
-          </div>
-          <div className="bg-white border rounded-xl p-5 flex flex-col items-start shadow-sm">
+          </div></Link>
+          <Link to="/login"><div className="bg-white border rounded-xl p-5 flex flex-col items-start shadow-sm">
             <div className="mb-2"><span className=""><PiChatTeardropDots size={24}></PiChatTeardropDots></span></div>
             <div className="font-semibold mb-1">Engage in Meaningful Discussions</div>
             <div className="text-gray-500 text-sm">Participate in discussions, share your story, and learn from others in a respectful and understanding community.</div>
-          </div>
-          <div className="bg-white border rounded-xl p-5 flex flex-col items-start shadow-sm">
+          </div></Link>
+          <Link to="/login"><div className="bg-white border rounded-xl p-5 flex flex-col items-start shadow-sm">
             <div className="mb-2"><span className=""><IoIosHeartEmpty size={24}></IoIosHeartEmpty></span></div>
             <div className="font-semibold mb-1">Find Encouragement</div>
             <div className="text-gray-500 text-sm">Receive and offer support, encouragement, and positive reinforcement to help each other through challenging times.</div>
-          </div>
+          </div></Link>
         </div>
       </section>
 
@@ -133,7 +134,7 @@ const IndexPage = () => {
       {/* Call to Action */}
       <section className="w-full flex flex-col items-center mt-16 mb-12 px-4">
         <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center">Ready to Start Your Journey?</h2>
-        <button className="px-8 py-3 rounded-full bg-[#e7d7c6] text-[#18162B] font-semibold shadow hover:bg-[#e0cbb3] transition">Join Mindfree Today</button>
+        <Link to="/login"><button className="px-8 py-3 rounded-full bg-[#e7d7c6] text-[#18162B] font-semibold shadow hover:bg-[#e0cbb3] transition">Join Mindfree Today</button></Link>
       </section>
     </div>
   );
