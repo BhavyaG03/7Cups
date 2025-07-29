@@ -38,6 +38,23 @@ const getUserResponses = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+// Get latest responses for a user (most recent)
+const getLatestUserResponses = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const responses = await Question.findOne({ userId }).sort({ createdAt: -1 });
+
+    if (!responses) {
+      return res.status(404).json({ message: "No responses found" });
+    }
+
+    res.status(200).json(responses);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 const deleteAll = async (req, res) => {
   try {
     const questions = await Question.deleteMany();
@@ -47,4 +64,4 @@ const deleteAll = async (req, res) => {
     res.status(500).json({ error: "Server error", details: error.message });
   }
 };
-module.exports = { saveResponses, getUserResponses,deleteAll };
+module.exports = { saveResponses, getUserResponses, getLatestUserResponses, deleteAll };

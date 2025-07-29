@@ -1,10 +1,11 @@
 const express = require("express");
-const { saveResponses, getUserResponses,deleteAll } = require("../controllers/questionController");
+const { saveResponses, getUserResponses, getLatestUserResponses, deleteAll } = require("../controllers/questionController");
 
 const router = express.Router();
 
 router.post("/", saveResponses);
 router.get("/:userId", getUserResponses);
+router.get("/latest/:userId", getLatestUserResponses);
 router.delete("/", deleteAll);
 
 

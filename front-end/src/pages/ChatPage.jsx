@@ -52,6 +52,8 @@ function ChatPage() {
   const navigate = useNavigate();
   // Track if listener has sent their first message
   const hasSetBusy = useRef(false);
+  // Track if we've already shown the speaker's Q&A
+  const hasShownQnA = useRef(false);
 
   // Determine the other party's name for the header
   const listenerName = location.state?.listenerName || "Listener";
@@ -126,6 +128,50 @@ function ChatPage() {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Function to fetch and display speaker's Q&A
+  const fetchAndDisplaySpeakerQnA = async (speakerId) => {
+    if (role !== "listener" || hasShownQnA.current) return;
+    
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/responses/latest/${speakerId}`);
+      const qnaData = response.data;
+      
+      if (qnaData && qnaData.responses) {
+        // Format the Q&A into a readable message with better styling
+        let qnaMessage = "📋 **Speaker's Responses**\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+        
+        qnaData.responses.forEach((item, index) => {
+          qnaMessage += `**${index + 1}. ${item.question}**\n`;
+          if (Array.isArray(item.answer)) {
+            qnaMessage += `  • ${item.answer.join('\n  • ')}\n\n`;
+          } else {
+            qnaMessage += `  → ${item.answer}\n\n`;
+          }
+        });
+        
+        if (qnaData.additionalNotes && qnaData.additionalNotes.trim()) {
+          qnaMessage += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n**💭 Additional Notes:**\n→ ${qnaData.additionalNotes}\n\n`;
+        }
+        
+        // Add the Q&A as the first message
+        const qnaMsgData = {
+          room,
+          author: "Anonymous",
+          message: qnaMessage,
+          time: new Date().toLocaleTimeString(),
+          isLocal: true,
+          side: "right",
+          name: "Anonymous",
+        };
+        
+        setMessageList(prev => [qnaMsgData, ...prev]);
+        hasShownQnA.current = true;
+      }
+    } catch (error) {
+      console.error("Error fetching speaker Q&A:", error);
+    }
   };
 
   const updateStatus = async (status) => {
@@ -318,7 +364,7 @@ function ChatPage() {
     localStorage.setItem('chatOnboarded', 'true');
   };
 
-  // Fetch other party's status
+  // Fetch other party's status and speaker's Q&A
   useEffect(() => {
     let otherId = null;
     let pollingRoom = false;
@@ -336,6 +382,10 @@ function ChatPage() {
             if (res.data && res.data.user_id) {
               otherId = res.data.user_id;
               setOtherStatus({ status: '', lastSeen: '' }); // Reset status
+              // Fetch speaker's Q&A for listener
+              if (role === 'listener') {
+                fetchAndDisplaySpeakerQnA(otherId);
+              }
               // Now start polling for status
               const fetchStatus = () => {
                 axios.get(`${import.meta.env.VITE_API_URL}/api/users/status/${otherId}`)
@@ -355,6 +405,10 @@ function ChatPage() {
     }
     console.log("Other party ID for status:", otherId); // Debug log
     if (otherId) {
+      // Fetch speaker's Q&A for listener if we have the speaker ID
+      if (role === 'listener') {
+        fetchAndDisplaySpeakerQnA(otherId);
+      }
       const fetchStatus = () => {
         axios.get(`${import.meta.env.VITE_API_URL}/api/users/status/${otherId}`)
           .then(res => setOtherStatus(res.data))
@@ -487,7 +541,7 @@ function ChatPage() {
     {typingUser === "Anonymous speaker" && (
       <span className="self-end ml-2 sm:ml-3">
         <span className="bg-white rounded-full border flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 p-1.5 sm:p-2">
-          <FaUserSecret className="w-5 h-5 text-gray-400 sm:w-7 sm:h-7" />
+          <FaUserSecret className="w-4 h-4 text-gray-400 sm:w-5 sm:h-5" />
         </span>
       </span>
     )}
