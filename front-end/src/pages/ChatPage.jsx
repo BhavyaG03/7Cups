@@ -41,7 +41,6 @@ function ChatPage() {
   const [typingTimeout, setTypingTimeout] = useState(null);
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
-  const [showOnboardModal, setShowOnboardModal] = useState(false);
   const [otherStatus, setOtherStatus] = useState({ status: '', lastSeen: '' });
   const socketRef = useRef(null);
   const hasJoinedRoom = useRef(false);
@@ -351,19 +350,6 @@ function ChatPage() {
     };
   }, [idleTimeout, typingTimeout, typingTimerId]);
 
-  useEffect(() => {
-    if (!localStorage.getItem('chatOnboarded')) {
-      setShowOnboardModal(true);
-      const timer = setTimeout(() => setShowOnboardModal(false), 10000);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  const handleCloseModal = () => {
-    setShowOnboardModal(false);
-    localStorage.setItem('chatOnboarded', 'true');
-  };
-
   // Fetch other party's status and speaker's Q&A
   useEffect(() => {
     let otherId = null;
@@ -422,22 +408,6 @@ function ChatPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* Onboarding Modal */}
-      {showOnboardModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-20" onClick={handleCloseModal}>
-          <div className="w-full max-w-xs p-6 text-center bg-white shadow-lg rounded-2xl" onClick={e => e.stopPropagation()}>
-            <h2 className="mb-3 text-lg font-bold">Welcome to Chat</h2>
-            <div className="space-y-2 text-base">
-              <div><span role="img" aria-label="flag">🚩</span> <span className="font-medium">Report</span>: Flag user</div>
-              <div><span role="img" aria-label="sos">🔺</span> <span className="font-medium">SOS</span>: Urgent help</div>
-              <div><span role="img" aria-label="end">👤</span> <span className="font-medium">End</span>: Finish chat</div>
-              <div><span className="font-medium">Send</span>: Send message</div>
-            </div>
-            <div className="mt-4 text-xs text-gray-400">This will disappear in 10 seconds</div>
-            <button className="px-4 py-1 mt-3 text-sm font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200" onClick={handleCloseModal}>Got it</button>
-          </div>
-        </div>
-      )}
       {/* Cozy image and chat area container */}
       <div className="w-full max-w-5xl px-2 mx-auto sm:px-4">
         {/* Cozy image at the top */}
@@ -555,7 +525,7 @@ function ChatPage() {
         <div className="flex items-center w-full max-w-lg px-2 py-2 bg-gray-100 shadow-md sm:max-w-2xl rounded-2xl sm:px-4 sm:py-3">
           <input
             type="text"
-            className="flex-1 bg-transparent outline-none border-none text-base px-1.5 sm:px-2 py-2 placeholder-gray-400"
+            className="flex-1 bg-transparent outline-none border-none text-base px-1.5 sm:px-2 py-2 placeholder-gray-400 min-w-0"
             placeholder="Type a message"
             value={message}
             onChange={e => {
@@ -565,41 +535,35 @@ function ChatPage() {
             onKeyDown={e => e.key === 'Enter' && sendMessage()}
             style={{ fontSize: '1rem' }}
           />
-          <button
-            className="mx-1 text-gray-400 sm:mx-2 hover:text-red-600"
-            onClick={report}
-            title="Report"
-          >
-            <span role="img" aria-label="flag" style={{ fontSize: 20, color: 'red' }}>🚩</span>
-          </button>
-          <button
-            className={`mx-1 sm:mx-2 ${role === 'listener' ? 'text-red-600' : 'hidden'}`}
-            onClick={sos}
-            title="SOS"
-          >
-            {/* Red triangle for SOS */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="12,3 22,20 2,20" fill="#dc2626" />
-            </svg>
-          </button>
-          <button
-            className="mx-1 text-blue-600 sm:mx-2 hover:text-blue-800"
-            onClick={endChat}
-            title="End Chat / Feedback"
-          >
-            {/* Feedback icon: chat bubble with checkmark */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="12" cy="7" r="4" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="9 11 12 14 15 11" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            </svg>
-          </button>
-          <button
-            className="px-4 py-2 ml-1 text-sm font-semibold text-gray-700 transition bg-blue-100 rounded-full sm:ml-2 sm:px-6 hover:bg-blue-200 sm:text-base"
-            onClick={sendMessage}
-          >
-            Send
-          </button>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <button
+              className="px-1.5 py-1 text-xs font-medium text-red-600 bg-red-100 rounded hover:bg-red-200 sm:px-2 sm:text-sm"
+              onClick={report}
+              title="Report"
+            >
+              Report
+            </button>
+            <button
+              className={`px-1.5 py-1 text-xs font-medium text-red-600 bg-red-100 rounded hover:bg-red-200 sm:px-2 sm:text-sm ${role === 'listener' ? '' : 'hidden'}`}
+              onClick={sos}
+              title="SOS"
+            >
+              SOS
+            </button>
+            <button
+              className="px-1.5 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded hover:bg-blue-200 sm:px-2 sm:text-sm"
+              onClick={endChat}
+              title="End Chat / Feedback"
+            >
+              End
+            </button>
+            <button
+              className="px-2 py-1 text-xs font-semibold text-gray-700 transition bg-blue-100 rounded hover:bg-blue-200 sm:px-3 sm:text-sm"
+              onClick={sendMessage}
+            >
+              Send
+            </button>
+          </div>
         </div>
       </div>
       <style>{`
