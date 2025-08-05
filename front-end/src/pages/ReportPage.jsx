@@ -54,7 +54,7 @@ function ReportPage() {
   return (
     <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="bg-white min-h-screen">
       <Header />
-      <div className="flex items-center justify-center min-h-screen bg-gray-100" style={{ fontFamily: 'Epilogue, sans-serif' }}>
+      <div className="flex items-center justify-center min-h-screen bg-white" style={{ fontFamily: 'Epilogue, sans-serif' }}>
         <div className="w-full max-w-md sm:p-6 px-3 sm:bg-white sm:rounded-xl sm:shadow-md mx-2">
           <h2 className="text-2xl font-bold text-center mb-3">Report User</h2>
           <p className="text-center text-gray-600 mb-6">

@@ -5,7 +5,7 @@ const SoSPage = () => {
   return (
     <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="bg-white min-h-screen">
       <Header />
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center px-4 py-8">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-8">
         <div className="w-full max-w-3xl mx-auto">
           <h1 className="text-2xl sm:text-3xl font-bold text-center mb-4">SOS Activated</h1>
           <p className="text-left sm:text-center text-gray-700 mb-8 max-w-3xl mx-auto text-base sm:text-lg">

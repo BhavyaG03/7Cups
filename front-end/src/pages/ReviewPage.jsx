@@ -55,7 +55,7 @@ const ReviewPage = () => {
   return (
     <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="bg-white min-h-screen">
       <Header />
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="w-full max-w-md sm:p-6 px-3 sm:bg-white sm:rounded-xl sm:shadow-md mx-2">
           {/* Top image with overlay */}
           <div className="relative w-full h-48 sm:h-64 rounded-xl overflow-hidden mb-6">

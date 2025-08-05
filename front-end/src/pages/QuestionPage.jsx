@@ -191,7 +191,7 @@ function QuestionPage() {
     <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="bg-white min-h-screen">
       <Header />
       {!showListeners ? (
-        <div className="w-full px-2 sm:px-0 flex flex-col items-center min-h-screen bg-gray-100 pb-10">
+        <div className="w-full px-2 sm:px-0 flex flex-col items-center min-h-screen bg-white pb-10">
           <h1 className="mb-8 text-2xl sm:text-3xl font-bold text-center px-2 pt-8">Help us get to know you</h1>
           <div className="h-2 mb-10 bg-gray-200 rounded-full w-full max-w-md sm:max-w-xl mx-auto">
             <div
@@ -250,7 +250,7 @@ function QuestionPage() {
           </div>
         </div>
       ) : (
-        <div className="w-full min-h-screen bg-[#f7fafd] flex flex-col items-center px-2 sm:px-0 py-10">
+        <div className="w-full min-h-screen bg-white flex flex-col items-center px-2 sm:px-0 py-10">
           <div className="w-full max-w-4xl mx-auto px-2 sm:px-0">
             <h1 className="text-3xl sm:text-4xl font-bold mb-2">Find Your Listener</h1>
             <p className="text-gray-500 mb-6">Based on your responses, we've matched you with listeners who can provide support.</p>

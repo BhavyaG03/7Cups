@@ -43,7 +43,7 @@ function ForumPage() {
   return (
     <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="bg-white min-h-screen">
       <Header />
-      <div className="min-h-screen px-4 py-12 bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500">
+      <div className="min-h-screen px-4 py-12 bg-white">
         <div className="max-w-4xl p-8 mx-auto space-y-6 bg-white rounded-lg shadow-xl">
           <h2 className="text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-red-500 to-pink-600">
             Forum

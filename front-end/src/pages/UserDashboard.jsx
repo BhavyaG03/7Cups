@@ -20,7 +20,7 @@ const UserDashboard = () => {
   return (
     <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="bg-white min-h-screen">
       <Header />
-      <div className="min-h-screen bg-[#f8fafc] w-full px-4 py-8">
+      <div className="min-h-screen bg-white w-full px-4 py-8">
         <div className="w-full max-w-5xl mx-auto">
           {/* Desktop: Two-column layout, Mobile: Stacked */}
           <div className="flex flex-col md:flex-row md:items-start md:gap-10 mb-8">
