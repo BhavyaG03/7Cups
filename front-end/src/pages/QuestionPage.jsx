@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import Header from '../components/Header';
 
 // List of specialties and avatar images for random assignment
 const SPECIALTIES = [
@@ -187,7 +188,8 @@ function QuestionPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="bg-white min-h-screen">
+      <Header />
       {!showListeners ? (
         <div className="w-full px-2 sm:px-0 flex flex-col items-center min-h-screen bg-gray-100 pb-10">
           <h1 className="mb-8 text-2xl sm:text-3xl font-bold text-center px-2 pt-8">Help us get to know you</h1>

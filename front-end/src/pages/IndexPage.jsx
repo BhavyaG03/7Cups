@@ -3,19 +3,13 @@ import { Link } from 'react-router-dom';
 import { IoIosHeartEmpty } from "react-icons/io";
 import { PiChatTeardropDots, PiUser, PiUsers } from "react-icons/pi";
 import { FaHeart, FaUserFriends } from "react-icons/fa";
-
+import Header from '../components/Header';
 
 const IndexPage = () => {
   return (
     <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="bg-white min-h-screen">
       {/* Header */}
-      <header className="w-full flex justify-between items-center px-4 sm:px-10 py-5 bg-white shadow-sm">
-        <div className="text-xl font-bold tracking-tight">Mindfree</div>
-        <div className="flex gap-4">
-          <Link to="/login" className="px-4 py-2 rounded-lg font-medium text-[#18162B] border border-[#18162B] hover:bg-[#f5f5f5] transition">Login</Link>
-          <Link to="/register" className="px-4 py-2 rounded-lg font-medium text-white bg-[#18162B] hover:bg-[#23204a] transition">Sign Up</Link>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="w-full flex flex-col items-center px-2 sm:px-0 mt-6">
