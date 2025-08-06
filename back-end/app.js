@@ -9,7 +9,7 @@ const userFeedbackRoutes=require("./routes/userFeedbackRoutes");
 const listenerFeedbackRoutes=require("./routes/listenerFeedbackroutes");
 const reportRoutes = require("./routes/reportRoutes");
 const questionRoutes = require("./routes/questionRoutes");
-const deleteRoutes=require("./controllers/messageController")
+const messageRoutes = require("./routes/messageRoutes");
 const journalRoutes = require("./routes/journalRoutes");
 
 
@@ -22,9 +22,9 @@ app.use("/api/chats", roomRoutes);
 app.use("/api/user/feedback", userFeedbackRoutes);
 app.use("/api/listener/feedback", listenerFeedbackRoutes);
 app.use("/api/responses", questionRoutes);
+app.use("/api/messages", messageRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/journal", journalRoutes);
-app.use(deleteRoutes);
 
 
 

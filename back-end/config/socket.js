@@ -1,7 +1,8 @@
 const socketIo = require("socket.io");
 const Message = require("../models/Message");
 const profanity = require("profanity-hindi");
-const User = require("../models/User"); // <-- Import User model
+const User = require("../models/User");
+const { messageStorage } = require("./redis");
 
 let usersInRoom = {};
 
@@ -26,7 +27,7 @@ const initSocket = (server) => {
       }
     });
 
-    socket.on("join_room", (data) => {
+    socket.on("join_room", async (data) => {
       // Accept both string (room) and object ({ room, userId })
       let room, userId;
       if (typeof data === 'string') {
@@ -50,6 +51,17 @@ const initSocket = (server) => {
       }
       console.log("[SOCKET] User joined room:", room, "userId:", userId, "socketId:", socket.id, "Current users after:", usersInRoom[room]);
       io.to(room).emit("user_joined", { userId: socket.id });
+      
+      // Fetch and send existing messages from Redis
+      try {
+        const messages = await messageStorage.getMessages(room);
+        if (messages.length > 0) {
+          socket.emit("load_messages", messages);
+        }
+      } catch (error) {
+        console.error("Error loading messages:", error);
+      }
+      
       // Debug: Show all users in the room after join
       console.log(`[SOCKET] Users in room ${room}:`, usersInRoom[room]);
     });
@@ -63,9 +75,9 @@ const initSocket = (server) => {
       // Censor profanities in the message
       msgData.message = profanity.maskBadWords(msgData.message);
 
-      // Store the message in the database
+      // Store the message in Redis for session persistence
       try {
-        const newMessage = new Message(msgData);
+        await messageStorage.storeMessage(msgData.room, msgData);
         io.to(msgData.room).emit("receive_message", msgData);
       } catch (error) {
         console.error("Error saving message:", error);
@@ -89,9 +101,16 @@ const initSocket = (server) => {
     
 
     // ✅ Handle chat end
-    socket.on("chatEnded", ({ room_id, listener_id, user_id, user_role }) => {
+    socket.on("chatEnded", async ({ room_id, listener_id, user_id, user_role }) => {
       console.log(`Chat ended in room: ${room_id}`);
       io.to(room_id).emit("chatEnded", { room_id, listener_id, user_id, user_role });
+
+      // Clear messages from Redis when chat ends
+      try {
+        await messageStorage.clearMessages(room_id);
+      } catch (error) {
+        console.error("Error clearing messages:", error);
+      }
 
       // Remove the room from tracking
       delete usersInRoom[room_id];

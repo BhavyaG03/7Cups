@@ -39,7 +39,7 @@ const IndexPage = () => {
 
       {/* Why Choose Section */}
       <section className="w-full max-w-[1100px] mx-auto mt-12 px-4">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2">Why Choose Mindfree?</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold mb-2">Why Choose MindFree?</h2>
         <p className="text-gray-600 mb-8">Something on your mind that is bothering you?
         You know, talking to someone about what's bothering you helps feel more calm and centered.</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -128,7 +128,7 @@ const IndexPage = () => {
       {/* Call to Action */}
       <section className="w-full flex flex-col items-center mt-16 mb-12 px-4">
         <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center">Ready to Start Your Journey?</h2>
-        <Link to="/login"><button className="px-8 py-3 rounded-full bg-[#e7d7c6] text-[#18162B] font-semibold shadow hover:bg-[#e0cbb3] transition">Join Mindfree Today</button></Link>
+        <Link to="/login"><button className="px-8 py-3 rounded-full bg-[#e7d7c6] text-[#18162B] font-semibold shadow hover:bg-[#e0cbb3] transition">Join MindFree Today</button></Link>
       </section>
     </div>
   );

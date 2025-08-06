@@ -1,19 +1,31 @@
-const express = require("express");
 const Message = require("../models/Message");
+const { messageStorage } = require('../config/redis');
 
-const router = express.Router();
-
-// Controller function to delete all messages
-const deleteAllMessages = async (req, res) => {
+// Get messages for a room
+const getMessages = async (req, res) => {
   try {
-    await Message.deleteMany({});
-    res.status(200).json({ message: "All messages deleted successfully." });
+    const { roomId } = req.params;
+    const messages = await messageStorage.getMessages(roomId);
+    res.json(messages);
   } catch (error) {
-    res.status(500).json({ error: "Failed to delete messages." });
+    console.error('Error fetching messages:', error);
+    res.status(500).json({ error: 'Failed to fetch messages' });
   }
 };
 
-// Define the DELETE route
-router.delete("/api/delete", deleteAllMessages);
+// Clear messages for a room
+const clearMessages = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    await messageStorage.clearMessages(roomId);
+    res.json({ message: 'Messages cleared successfully' });
+  } catch (error) {
+    console.error('Error clearing messages:', error);
+    res.status(500).json({ error: 'Failed to clear messages' });
+  }
+};
 
-module.exports = router;
+module.exports = {
+  getMessages,
+  clearMessages
+};

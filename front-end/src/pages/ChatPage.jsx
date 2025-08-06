@@ -67,6 +67,31 @@ function ChatPage() {
         hasJoinedRoom.current = true;
       }
 
+      // Fallback: Fetch messages via API if socket fails
+      const fetchMessagesFallback = async () => {
+        try {
+          const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/messages/${room}`);
+          if (response.data && response.data.length > 0) {
+            setMessageList(response.data);
+          }
+        } catch (error) {
+          console.error("Error fetching messages via API:", error);
+        }
+      };
+
+      // Set a timeout to fetch messages if socket doesn't respond
+      const messageTimeout = setTimeout(fetchMessagesFallback, 3000);
+      
+      // Clear timeout if messages are loaded via socket
+      const handleMessagesLoaded = () => {
+        clearTimeout(messageTimeout);
+      };
+      
+      socketRef.current.on("load_messages", (messages) => {
+        handleMessagesLoaded();
+        setMessageList(messages);
+      });
+
       // Attach all socket event handlers only once
       const handleUserJoined = ({ userName }) => {
         new Audio("/discordJoin.mp3").play();
@@ -92,6 +117,13 @@ function ChatPage() {
         );
         setIsTyping(false);
       };
+      const handleLoadMessages = (messages) => {
+        setMessageList(messages);
+        // Clear the fallback timeout since messages were loaded via socket
+        if (messageTimeout) {
+          clearTimeout(messageTimeout);
+        }
+      };
       const handleRoomFull = (data) => {
         // Only show error if not already in the room
         if (!hasJoinedRoom.current) {
@@ -104,15 +136,17 @@ function ChatPage() {
       socketRef.current.on("user_left", handleUserLeft);
       socketRef.current.on("user_typing", handleUserTyping);
       socketRef.current.on("receive_message", handleReceiveMessage);
+      socketRef.current.on("load_messages", handleLoadMessages);
       socketRef.current.on("room_full", handleRoomFull);
 
       return () => {
         if (socketRef.current) {
-          socketRef.current.off("user_joined", handleUserJoined);
-          socketRef.current.off("user_left", handleUserLeft);
-          socketRef.current.off("user_typing", handleUserTyping);
-          socketRef.current.off("receive_message", handleReceiveMessage);
-          socketRef.current.off("room_full", handleRoomFull);
+                  socketRef.current.off("user_joined", handleUserJoined);
+        socketRef.current.off("user_left", handleUserLeft);
+        socketRef.current.off("user_typing", handleUserTyping);
+        socketRef.current.off("receive_message", handleReceiveMessage);
+        socketRef.current.off("load_messages", handleLoadMessages);
+        socketRef.current.off("room_full", handleRoomFull);
           socketRef.current.disconnect();
           socketRef.current = null;
         }
@@ -535,30 +569,30 @@ function ChatPage() {
             onKeyDown={e => e.key === 'Enter' && sendMessage()}
             style={{ fontSize: '1rem' }}
           />
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
-              className="px-1.5 py-1 text-xs font-medium text-red-600 bg-red-100 rounded hover:bg-red-200 sm:px-2 sm:text-sm"
+              className="px-2 py-1 text-xs font-medium text-red-600 bg-red-100 rounded hover:bg-red-200 sm:px-3 sm:text-sm"
               onClick={report}
               title="Report"
             >
               Report
             </button>
             <button
-              className={`px-1.5 py-1 text-xs font-medium text-red-600 bg-red-100 rounded hover:bg-red-200 sm:px-2 sm:text-sm ${role === 'listener' ? '' : 'hidden'}`}
+              className={`px-2 py-1 text-xs font-medium text-red-600 bg-red-100 rounded hover:bg-red-200 sm:px-3 sm:text-sm ${role === 'listener' ? '' : 'hidden'}`}
               onClick={sos}
               title="SOS"
             >
               SOS
             </button>
             <button
-              className="px-1.5 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded hover:bg-blue-200 sm:px-2 sm:text-sm"
+              className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded hover:bg-blue-200 sm:px-3 sm:text-sm"
               onClick={endChat}
               title="End Chat / Feedback"
             >
               End
             </button>
             <button
-              className="px-2 py-1 text-xs font-semibold text-gray-700 transition bg-blue-100 rounded hover:bg-blue-200 sm:px-3 sm:text-sm"
+              className="px-3 py-1 text-xs font-semibold text-gray-700 transition bg-blue-100 rounded hover:bg-blue-200 sm:px-4 sm:text-sm"
               onClick={sendMessage}
             >
               Send
