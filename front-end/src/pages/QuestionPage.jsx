@@ -223,8 +223,13 @@ function QuestionPage() {
 
               {questions[currentQuestion].multiple && (
                 <button
-                  className="px-4 py-3 font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-800 focus:outline-none w-full mt-2 text-sm sm:text-base"
-                  onClick={() => handleNext(selectedOptions)}
+                  className={`px-4 py-3 font-bold rounded-xl focus:outline-none w-full mt-2 text-sm sm:text-base transition-all ${
+                    selectedOptions.length > 0 
+                      ? "bg-blue-600 text-white hover:bg-blue-800" 
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                  onClick={() => selectedOptions.length > 0 && handleNext(selectedOptions)}
+                  disabled={selectedOptions.length === 0}
                 >
                   Continue
                 </button>

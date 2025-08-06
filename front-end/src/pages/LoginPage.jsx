@@ -40,7 +40,6 @@ function LoginPage() {
         navigate("/preview");
       }
 
-      alert("Logged in successfully");
     } catch (err) {
       alert(err.response?.data?.message || "Error logging in");
     } finally {
