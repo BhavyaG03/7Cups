@@ -34,43 +34,7 @@ const UserDashboard = () => {
                 <div className="text-sm text-gray-400">Start your day with a 10–minute guided meditation.</div>
               </div>
               {/* Progress Card */}
-              <div className="mb-8">
-                <div className="font-semibold text-lg mb-3 md:mb-2">Your Progress</div>
-                {/* Mobile: stacked card */}
-                <div className="block md:hidden">
-                  <div className="bg-white rounded-2xl shadow border border-gray-200 p-0 overflow-hidden w-full max-w-md mx-auto">
-                    <div className="flex flex-col divide-y divide-gray-200">
-                      <div className="flex items-center justify-between px-6 py-5">
-                        <span className="text-gray-500 text-base">Days Active</span>
-                        <span className="text-2xl font-bold">14</span>
-                      </div>
-                      <div className="flex items-center justify-between px-6 py-5">
-                        <span className="text-gray-500 text-base">Sessions Completed</span>
-                        <span className="text-2xl font-bold">28</span>
-                      </div>
-                      <div className="flex items-center justify-between px-6 py-5">
-                        <span className="text-gray-500 text-base">Average Mood</span>
-                        <span className="text-2xl font-bold">7.5</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                {/* Desktop: 3-column grid */}
-                <div className="hidden md:grid md:grid-cols-3 md:gap-4">
-                  <div className="bg-white rounded-2xl shadow border border-gray-200 p-6 flex flex-col items-start">
-                    <span className="text-gray-500 text-base mb-1">Days Active</span>
-                    <span className="text-2xl font-bold">14</span>
-                  </div>
-                  <div className="bg-white rounded-2xl shadow border border-gray-200 p-6 flex flex-col items-start">
-                    <span className="text-gray-500 text-base mb-1">Sessions Completed</span>
-                    <span className="text-2xl font-bold">28</span>
-                  </div>
-                  <div className="bg-white rounded-2xl shadow border border-gray-200 p-6 flex flex-col items-start">
-                    <span className="text-gray-500 text-base mb-1">Average Mood</span>
-                    <span className="text-2xl font-bold">7.5</span>
-                  </div>
-                </div>
-              </div>
+              
               {/* Quick Actions */}
               <div className="mb-8 max-w-md md:max-w-lg w-full">
                 <div className="font-semibold text-lg mb-3">Quick Actions</div>

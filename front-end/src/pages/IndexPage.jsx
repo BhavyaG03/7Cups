@@ -93,37 +93,7 @@ const IndexPage = () => {
         </div>
       </section>
 
-      {/* Benefits of Joining Section */}
-      <section className="w-full max-w-[1100px] mx-auto mt-16 px-4">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2">Benefits of Joining</h2>
-        <p className="text-gray-600 mb-8">Joining Mindful Space can provide numerous benefits for your mental health and well-being. Our community-driven approach offers a unique blend of support, education, and personal development.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {/* Card 1 */}
-          <div className="bg-[#f8f6f2] rounded-xl shadow-sm flex flex-col items-center p-0 overflow-hidden min-h-[120px]">
-            <img src="/c1.png" alt="Find Understanding and Support" className="w-full h-40 object-cover rounded-t-xl" />
-            <div className="flex-1 p-5 flex flex-col items-center text-center">
-              <div className="font-semibold mb-1">Find Understanding and Support</div>
-              <div className="text-gray-500 text-sm">Connect with others who understand your experiences and can offer valuable support and encouragement.</div>
-            </div>
-          </div>
-          {/* Card 2 */}
-          <div className="bg-[#f8f6f2] rounded-xl shadow-sm flex flex-col items-center p-0 overflow-hidden min-h-[120px]">
-            <img src="/c2.png" alt="Improve Your Mental Well-being" className="w-full h-40 object-cover rounded-t-xl" />
-            <div className="flex-1 p-5 flex flex-col items-center text-center">
-              <div className="font-semibold mb-1">Improve Your Mental Well-being</div>
-              <div className="text-gray-500 text-sm">Engage in activities and discussions that promote mindfulness, stress reduction, and emotional resilience.</div>
-            </div>
-          </div>
-          {/* Card 3 */}
-          <div className="bg-[#f8f6f2] rounded-xl shadow-sm flex flex-col items-center p-0 overflow-hidden min-h-[120px]">
-            <img src="/c3.png" alt="Track Your Progress" className="w-full h-40 object-cover rounded-t-xl" />
-            <div className="flex-1 p-5 flex flex-col items-center text-center">
-              <div className="font-semibold mb-1">Track Your Progress</div>
-              <div className="text-gray-500 text-sm">Utilize our tools to track your mood, set goals, and monitor your progress over time.</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Call to Action */}
       <section className="w-full flex flex-col items-center mt-16 mb-12 px-4">
