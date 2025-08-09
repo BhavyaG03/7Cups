@@ -81,8 +81,25 @@ const initSocket = (server) => {
         return;
       }
 
+      // Debug: Log the message data to understand what's being sent
+      console.log("Message data received:", typeof msgData.message, msgData.message);
+      
       // Censor profanities in the message
-      msgData.message = profanity.maskBadWords(msgData.message);
+      // Ensure message is a string before processing
+      if (msgData.message && typeof msgData.message === 'string' && msgData.message.trim() !== '') {
+        try {
+          msgData.message = profanity.maskBadWords(msgData.message);
+        } catch (error) {
+          console.error("Profanity filter error:", error);
+          console.log("Message that caused error:", msgData.message, typeof msgData.message);
+          // Continue without profanity filtering if there's an error
+        }
+      } else {
+        // If message is not a valid string, reject it
+        console.log("Invalid message format:", msgData.message, typeof msgData.message);
+        socket.emit("error_message", { error: "Invalid message format." });
+        return;
+      }
 
       // Store the message in Redis for session persistence
       try {

@@ -33,13 +33,19 @@ function formatLastSeen(dateString) {
 
 // Helper to convert newlines to React elements
 function formatMessageWithNewlines(message) {
-  if (!message) return '';
-  return message.split('\n').map((line, index) => (
-    <React.Fragment key={index}>
-      {index > 0 && <br />}
-      {line}
-    </React.Fragment>
-  ));
+  if (!message || typeof message !== 'string') return message || '';
+  
+  try {
+    return message.split('\n').map((line, index) => (
+      <React.Fragment key={index}>
+        {index > 0 && <br />}
+        {line}
+      </React.Fragment>
+    ));
+  } catch (error) {
+    console.error('Error formatting message:', error);
+    return message; // Return original message if formatting fails
+  }
 }
 
 function ChatPage() {
