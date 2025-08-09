@@ -42,7 +42,7 @@ const IndexPage = () => {
         <h2 className="text-2xl sm:text-3xl font-bold mb-2">Why Choose MindFree?</h2>
         <p className="text-gray-600 mb-8">Something on your mind that is bothering you?
         You know, talking to someone about what's bothering you helps feel more calm and centered.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link to="/login"><div className="bg-white border rounded-xl p-5 flex flex-col items-start shadow-sm">
             <div className="mb-2"><span className=""><PiUsers size={24}></PiUsers></span></div>
             <div className="font-semibold mb-1">Connect with Peers</div>
@@ -58,36 +58,36 @@ const IndexPage = () => {
             <div className="font-semibold mb-1">Find Encouragement</div>
             <div className="text-gray-500 text-sm">Receive and offer support, encouragement, and positive reinforcement to help each other through challenging times.</div>
           </div></Link>
-        </div>
+        </div> */}
       </section>
 
       {/* Features Section */}
       <section className="w-full max-w-[1100px] mx-auto mt-16 px-4">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2">More Than Just a Platform</h2>
-        <p className="text-gray-600 mb-8">Explore the features that make our platform a unique space for mental health support and community engagement.</p>
+        <h2 className="text-2xl sm:text-3xl font-bold mb-2">Be Rest Assured</h2>
+        <p className="text-gray-600 mb-8">Explore the features that make our platform a unique space for mental health support.</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {/* Card 1 */}
           <div className="bg-[#f8f6f2] rounded-xl shadow-sm flex flex-row sm:flex-col items-center p-0 overflow-hidden min-h-[120px]">
             <img src="/i1.png" alt="Community Groups" className="w-24 h-24 object-cover rounded-lg m-4 sm:w-full sm:h-40 sm:rounded-t-xl sm:rounded-b-none sm:m-0" />
             <div className="flex-1 p-5 flex flex-col justify-center sm:items-center sm:text-center">
-              <div className="font-semibold mb-1">Diverse Community Groups</div>
-              <div className="text-gray-500 text-sm">Explore a wide range of groups covering various mental health topics, interests, and demographics.</div>
+              <div className="font-semibold mb-1">Listeners@Mindfree</div>
+              <div className="text-gray-500 text-sm"> Our Listeners are empathetic, emotionally intelligent individuals who have been trained to help you share comfortably </div>
             </div>
           </div>
           {/* Card 2 */}
           <div className="bg-[#f8f6f2] rounded-xl shadow-sm flex flex-row sm:flex-col items-center p-0 overflow-hidden min-h-[120px]">
             <img src="/i2.png" alt="Mindfulness Resources" className="w-24 h-24 object-cover rounded-lg m-4 sm:w-full sm:h-40 sm:rounded-t-xl sm:rounded-b-none sm:m-0" />
             <div className="flex-1 p-5 flex flex-col justify-center sm:items-center sm:text-center">
-              <div className="font-semibold mb-1">Mindfulness Resources</div>
-              <div className="text-gray-500 text-sm">Access guided meditations, articles, and other resources to support your mindfulness practice and overall well-being.</div>
+              <div className="font-semibold mb-1">You deserve privacy</div>
+              <div className="text-gray-500 text-sm">We don't store or view any chats, so you can share what's on your mind in total privacy </div>
             </div>
           </div>
           {/* Card 3 */}
           <div className="bg-[#f8f6f2] rounded-xl shadow-sm flex flex-row sm:flex-col items-center p-0 overflow-hidden min-h-[120px]">
             <img src="/i3.png" alt="Peer Support Network" className="w-24 h-24 object-cover rounded-lg m-4 sm:w-full sm:h-40 sm:rounded-t-xl sm:rounded-b-none sm:m-0" />
             <div className="flex-1 p-5 flex flex-col justify-center sm:items-center sm:text-center">
-              <div className="font-semibold mb-1">Peer Support Network</div>
-              <div className="text-gray-500 text-sm">Connect with trained peer supporters who can offer guidance and understanding based on their own experiences.</div>
+              <div className="font-semibold mb-1">Your thoughts are safe with us</div>
+              <div className="text-gray-500 text-sm">Your journal entries are stored in encrypted form so that no one but you can read your entries</div>
             </div>
           </div>
         </div>

@@ -56,38 +56,7 @@ const ListenerDashboard = () => {
           {/* Dashboard Title and content */}
           <div className="w-full">
             <h1 className="text-2xl sm:text-3xl font-bold mb-6">Listener Dashboard</h1>
-            {/* Total Sessions */}
-            <div className="bg-[#F2EDE8] rounded-xl p-6 mb-8">
-              <div className="text-base text-gray-700 mb-1">Total Sessions</div>
-              <div className="text-3xl font-bold text-gray-900">230</div>
-            </div>
-            {/* Forum Moderation Table */}
-            <div className="mb-8">
-              <div className="font-semibold mb-2">Forum Moderation</div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-base border-separate border-spacing-0">
-                  <thead>
-                    <tr className="bg-white">
-                      <th className="px-4 py-2 font-medium text-gray-700">Name</th>
-                      <th className="px-4 py-2 font-medium text-gray-700">Topic</th>
-                      <th className="px-4 py-2 font-medium text-gray-700">Time</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="bg-white">
-                      <td className="px-4 py-2 border-t border-gray-200 rounded-tl-xl">Liam</td>
-                      <td className="px-4 py-2 border-t border-gray-200 text-[#b88a5a]">I've been having trouble sleeping. Any advice?</td>
-                      <td className="px-4 py-2 border-t border-gray-200 rounded-tr-xl">3 days ago</td>
-                    </tr>
-                    <tr className="bg-white">
-                      <td className="px-4 py-2 border-t border-gray-200 rounded-bl-xl">Chloe</td>
-                      <td className="px-4 py-2 border-t border-gray-200 text-[#b88a5a]">I'm here to support you. Let's work through this together.</td>
-                      <td className="px-4 py-2 border-t border-gray-200 rounded-br-xl">4 days ago</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+
             {/* Start Session Button */}
             <div className="mt-6">
               <div className="font-semibold mb-2">Start Session</div>

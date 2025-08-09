@@ -32,12 +32,15 @@ const inMemoryStorage = new Map();
 const messageStorage = {
   // Store a message for a room (expires in 24 hours)
   async storeMessage(roomId, message) {
+    const startTime = Date.now();
     try {
       if (isRedisConnected) {
         const key = `messages:${roomId}`;
         await client.lPush(key, JSON.stringify(message));
         // Set expiration to 24 hours
         await client.expire(key, 24 * 60 * 60);
+        const endTime = Date.now();
+        console.log(`[REDIS] Message stored in ${endTime - startTime}ms`);
       } else {
         // Fallback to in-memory storage
         if (!inMemoryStorage.has(roomId)) {

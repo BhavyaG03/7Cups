@@ -12,6 +12,13 @@ const initSocket = (server) => {
       origin: process.env.CLIENT_URL,
       methods: ["GET", "POST"],
     },
+    transports: ['websocket'], // Force WebSocket
+    pingTimeout: 30000, // 30 seconds (reduced)
+    pingInterval: 10000, // 10 seconds (reduced)
+    maxHttpBufferSize: 1e6, // 1MB
+    allowEIO3: true,
+    connectTimeout: 20000, // 20 seconds
+    upgradeTimeout: 10000, // 10 seconds
   });
 
   io.on("connection", (socket) => {
@@ -67,6 +74,8 @@ const initSocket = (server) => {
     });
 
     socket.on("send_message", async (msgData) => {
+      const startTime = Date.now();
+      
       if (!usersInRoom[msgData.room] || !usersInRoom[msgData.room].includes(socket.id)) {
         socket.emit("error_message", { error: "You are not in this room to send a message." });
         return;
@@ -79,6 +88,8 @@ const initSocket = (server) => {
       try {
         await messageStorage.storeMessage(msgData.room, msgData);
         io.to(msgData.room).emit("receive_message", msgData);
+        const endTime = Date.now();
+        console.log(`[PERF] Message sent in ${endTime - startTime}ms`);
       } catch (error) {
         console.error("Error saving message:", error);
       }
@@ -96,7 +107,10 @@ const initSocket = (server) => {
       io.to(room_id).emit("report", { room_id, reported_by, reported_person });
     });
     socket.on("user_typing", ({ room, userName }) => {
+      const startTime = Date.now();
       socket.to(room).emit("user_typing", { userName });
+      const endTime = Date.now();
+      console.log(`[PERF] Typing indicator sent in ${endTime - startTime}ms`);
     });
     
 

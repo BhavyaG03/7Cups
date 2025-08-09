@@ -27,12 +27,7 @@ const UserDashboard = () => {
             {/* Left column: Welcome, focus, progress, quick actions */}
             <div className="flex-1 flex flex-col gap-6">
               <h1 className="text-2xl sm:text-3xl font-bold text-center md:text-left mt-2">Welcome back, {username}</h1>
-              <div className="text-center md:text-left w-full">
-                <div className="text-base font-medium text-gray-500 mb-1">Today's Focus</div>
-                <div className="text-lg font-normal text-gray-700 mb-0.5">Mindfulness</div>
-                <div className="text-lg font-bold text-gray-900 mb-1">Morning Meditation</div>
-                <div className="text-sm text-gray-400">Start your day with a 10–minute guided meditation.</div>
-              </div>
+              
               {/* Progress Card */}
               
               {/* Quick Actions */}

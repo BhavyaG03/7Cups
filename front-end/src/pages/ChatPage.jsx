@@ -9,7 +9,13 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import { FaUserSecret, FaHeadphones } from "react-icons/fa";
 
-const socket = io(`${import.meta.env.VITE_API_URL}`, { autoConnect: false });
+const socket = io(`${import.meta.env.VITE_API_URL}`, { 
+  autoConnect: false,
+  transports: ['websocket'], // Force WebSocket for better performance
+  upgrade: false, // Disable polling upgrade
+  timeout: 5000, // Reduce connection timeout
+  forceNew: true // Ensure fresh connection
+});
 // Gender-neutral static avatar
 const neutralAvatar = "https://ui-avatars.com/api/?name=User&background=random&rounded=true";
 
@@ -23,6 +29,17 @@ function formatLastSeen(dateString) {
   if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
   return date.toLocaleString();
+}
+
+// Helper to convert newlines to React elements
+function formatMessageWithNewlines(message) {
+  if (!message) return '';
+  return message.split('\n').map((line, index) => (
+    <React.Fragment key={index}>
+      {index > 0 && <br />}
+      {line}
+    </React.Fragment>
+  ));
 }
 
 function ChatPage() {
@@ -42,6 +59,8 @@ function ChatPage() {
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
   const [otherStatus, setOtherStatus] = useState({ status: '', lastSeen: '' });
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [connectionQuality, setConnectionQuality] = useState('unknown');
   const socketRef = useRef(null);
   const hasJoinedRoom = useRef(false);
   // Use user?.id, user?.username, user?.role, etc. everywhere below
@@ -60,7 +79,14 @@ function ChatPage() {
 
   useEffect(() => {
     if (user && room) {
-      socketRef.current = io(`${import.meta.env.VITE_API_URL}`, { autoConnect: true });
+      socketRef.current = io(`${import.meta.env.VITE_API_URL}`, { 
+        autoConnect: true,
+        transports: ['websocket'],
+        upgrade: false,
+        timeout: 5000,
+        forceNew: true
+      });
+      
       // Only emit join_room once
       if (!hasJoinedRoom.current) {
         socketRef.current.emit("join_room", room);
@@ -108,7 +134,7 @@ function ChatPage() {
         const timeout = setTimeout(() => {
           setIsTyping(false);
           setTypingUser("");
-        }, 3000);
+        }, 2000); // Reduced from 3000ms to 2000ms
         setTypingTimeout(timeout);
       };
       const handleReceiveMessage = (data) => {
@@ -132,6 +158,24 @@ function ChatPage() {
         }
       };
 
+      // Connection status handlers
+      socketRef.current.on("connect", () => {
+        console.log("Socket connected");
+        setSocketConnected(true);
+        setConnectionQuality('connected');
+      });
+      
+      socketRef.current.on("disconnect", () => {
+        console.log("Socket disconnected");
+        setSocketConnected(false);
+        setConnectionQuality('disconnected');
+      });
+      
+      socketRef.current.on("connect_error", (error) => {
+        console.log("Socket connection error:", error);
+        setConnectionQuality('error');
+      });
+      
       socketRef.current.on("user_joined", handleUserJoined);
       socketRef.current.on("user_left", handleUserLeft);
       socketRef.current.on("user_typing", handleUserTyping);
@@ -173,20 +217,18 @@ function ChatPage() {
       
       if (qnaData && qnaData.responses) {
         // Format the Q&A into a readable message with better styling
-        let qnaMessage = "📋 **Speaker's Responses**\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+        let qnaMessage = "📋 Speaker's Responses\n\n";
         
         qnaData.responses.forEach((item, index) => {
-          qnaMessage += `**${index + 1}. ${item.question}**\n`;
+          qnaMessage += `${index + 1}. ${item.question}\n`;
           if (Array.isArray(item.answer)) {
             qnaMessage += `  • ${item.answer.join('\n  • ')}\n\n`;
           } else {
             qnaMessage += `  → ${item.answer}\n\n`;
           }
+          qnaMessage += '\n';
         });
         
-        if (qnaData.additionalNotes && qnaData.additionalNotes.trim()) {
-          qnaMessage += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n**💭 Additional Notes:**\n→ ${qnaData.additionalNotes}\n\n`;
-        }
         
         // Add the Q&A as the first message
         const qnaMsgData = {
@@ -226,7 +268,7 @@ function ChatPage() {
     const timerId = setTimeout(() => {
       const author = role === "user" ? "Anonymous speaker" : userName;
       socketRef.current.emit("user_typing", { room, userName: author });
-    }, 300);
+    }, 50); // Super aggressive - 50ms delay
     setTypingTimerId(timerId);
   };
 
@@ -455,15 +497,26 @@ function ChatPage() {
         <div className="pt-1 pb-1 text-2xl font-bold text-center sm:text-3xl sm:pt-2 sm:pb-2">
           {headerName}
         </div>
-        <div className="mb-2 text-xs text-center text-gray-500">
-          {otherStatus.status === 'busy'
-            ? 'Busy'
-            : otherStatus.status === 'online'
-              ? 'Online'
-              : otherStatus.lastSeen
-                ? `Last seen ${formatLastSeen(otherStatus.lastSeen)}`
-                : 'Status unknown'}
-        </div>
+                 <div className="mb-2 text-xs text-center text-gray-500">
+           {otherStatus.status === 'busy'
+             ? 'Busy'
+             : otherStatus.status === 'online'
+               ? 'Online'
+               : otherStatus.lastSeen
+                 ? `Last seen ${formatLastSeen(otherStatus.lastSeen)}`
+                 : 'Status unknown'}
+           {connectionQuality !== 'connected' && (
+             <span className={`ml-2 px-2 py-1 rounded text-xs ${
+               connectionQuality === 'error' ? 'bg-red-100 text-red-600' : 
+               connectionQuality === 'disconnected' ? 'bg-yellow-100 text-yellow-600' : 
+               'bg-gray-100 text-gray-600'
+             }`}>
+               {connectionQuality === 'error' ? 'Connection Error' : 
+                connectionQuality === 'disconnected' ? 'Disconnected' : 
+                'Connecting...'}
+             </span>
+           )}
+         </div>
         {/* Chat area */}
         <div className="flex flex-col flex-1 w-full pt-2 space-y-4 sm:pt-4 pb-28 sm:pb-32 sm:space-y-6">
           {messageList.map((msg, idx) => (
@@ -484,7 +537,7 @@ function ChatPage() {
                       className="rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-sm bg-[#F5F2F0] text-[#171412]"
                       style={{ fontFamily: 'inherit', fontWeight: 400, maxWidth: '340px', wordBreak: 'break-word', lineHeight: '1.4' }}
                     >
-                      {msg.message}
+                      {formatMessageWithNewlines(msg.message)}
                     </div>
                   </div>
                 </>
@@ -497,7 +550,7 @@ function ChatPage() {
                       className="rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-sm bg-[#EB9642] text-[#171412]"
                       style={{ fontFamily: 'inherit', fontWeight: 400, maxWidth: '340px', wordBreak: 'break-word', lineHeight: '1.4' }}
                     >
-                      {msg.message}
+                      {formatMessageWithNewlines(msg.message)}
                     </div>
                   </div>
                   <span className="self-end ml-2 sm:ml-3">
@@ -555,6 +608,16 @@ function ChatPage() {
         </div>
       </div>
       {/* Input bar */}
+      {/* Disclaimer */}
+      <div className="fixed bottom-16 sm:bottom-20 left-0 right-0 z-5 px-4 sm:px-6">
+        <div className="max-w-lg mx-auto sm:max-w-2xl">
+          <div className="rounded-lg p-3 text-center shadow-sm">
+            <p className="text-xs sm:text-sm mb-2">
+              ⚠️ Please end the chat before closing the tab or browser
+            </p>
+          </div>
+        </div>
+      </div>
       <div className="fixed bottom-0 left-0 z-10 flex justify-center w-full px-2 pb-4 bg-white border-t border-gray-200 sm:pb-8 sm:px-0 sm:border-t-0">
         <div className="flex items-center w-full max-w-lg px-2 py-2 bg-gray-100 shadow-md sm:max-w-2xl rounded-2xl sm:px-4 sm:py-3">
           <input
