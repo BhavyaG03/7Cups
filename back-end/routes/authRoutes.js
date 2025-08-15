@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/register', register);
 router.post('/login', login);
-router.post('/verify-email/:token', verifyEmail);
+router.post('/verify-email', verifyEmail);
 router.post('/resend-verification', resendVerificationEmail);
 router.post('/start-session', startSession);
 router.put('/edit/:id', editUser);

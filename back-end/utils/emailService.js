@@ -16,8 +16,7 @@ const sendVerificationEmail = async (email, verificationToken, username) => {
   try {
     const transporter = createTransporter();
     
-    // Use a route parameter instead of a query parameter for better cross-device compatibility
-    const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/verify-email/${verificationToken}`;
+    const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
     
     const mailOptions = {
       from: process.env.EMAIL_USER,

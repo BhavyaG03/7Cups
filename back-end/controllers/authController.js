@@ -67,7 +67,11 @@ exports.register = async (req, res) => {
 // VERIFY EMAIL
 exports.verifyEmail = async (req, res) => {
   try {
-    const { token } = req.params;
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ message: 'Verification token is required' });
+    }
 
     const user = await User.findOne({
       emailVerificationToken: token,

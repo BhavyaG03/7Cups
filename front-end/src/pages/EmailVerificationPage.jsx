@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams, useNavigate, useParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Header from '../components/Header';
 
 function EmailVerificationPage() {
   const [searchParams] = useSearchParams();
-  const params = useParams();
   const navigate = useNavigate();
   const [verificationStatus, setVerificationStatus] = useState("verifying");
   const [message, setMessage] = useState("");
-  // Get token from either URL params or query params
-  const token = params.token || searchParams.get("token");
+  const token = searchParams.get("token");
 
   useEffect(() => {
     if (token) {
@@ -24,9 +22,13 @@ function EmailVerificationPage() {
   const verifyEmail = async () => {
     const apiUrl = import.meta.env.VITE_API_URL;
     try {
-      const response = await axios.post(`${apiUrl}/api/users/verify-email/${token}`);
+      // Send token as a query parameter in the request body instead of URL parameter
+      const response = await axios.post(`${apiUrl}/api/users/verify-email`, { token });
       setVerificationStatus("success");
       setMessage(response.data.message);
+      
+      // Store verification status in localStorage to maintain across browsers/devices
+      localStorage.setItem('emailVerified', 'true');
       
       // Redirect to login after 3 seconds
       setTimeout(() => {
