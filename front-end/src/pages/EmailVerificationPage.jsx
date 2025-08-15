@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Header from '../components/Header';
 
 function EmailVerificationPage() {
   const [searchParams] = useSearchParams();
+  const params = useParams();
   const navigate = useNavigate();
   const [verificationStatus, setVerificationStatus] = useState("verifying");
   const [message, setMessage] = useState("");
-  const token = searchParams.get("token");
+  // Get token from either URL params or query params
+  const token = params.token || searchParams.get("token");
 
   useEffect(() => {
     if (token) {

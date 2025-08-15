@@ -69,6 +69,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/verify-email" element={<EmailVerificationPage />} />
+        <Route path="/verify-email/:token" element={<EmailVerificationPage />} />
         <Route path="/resend-verification" element={<ResendVerificationPage />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/forum" element={<ForumPage />} />
