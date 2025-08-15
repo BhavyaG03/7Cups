@@ -342,10 +342,32 @@ function ChatPage() {
         sessionStorage.removeItem('room_id');
         navigate("/review", { state: { room_id, listener_id, user_id, user_role } });
       });
+
+      // Handle user disconnection (browser tab close, etc.)
+      socketRef.current.on("userDisconnected", async ({ room_id, listener_id, user_id, disconnected_user_role }) => {
+        console.log("User disconnected from chat:", { room_id, listener_id, user_id, disconnected_user_role });
+        alert(`Your ${disconnected_user_role || "chat partner"} has disconnected unexpectedly. You will be redirected to the review page.`);
+        
+        // If current user is the listener, set status to offline and clear room_id
+        if (user?.role === "listener") {
+          try {
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/users/edit/${user.id}`, { 
+              status: "offline", 
+              room_id: null 
+            });
+          } catch (error) {
+            console.error("Error updating listener status:", error);
+          }
+        }
+        
+        sessionStorage.removeItem('room_id');
+        navigate("/review", { state: { room_id, listener_id, user_id, user_role: disconnected_user_role } });
+      });
     }
     return () => {
       if (socketRef.current) {
         socketRef.current.off("chatEnded");
+        socketRef.current.off("userDisconnected");
       }
     };
   }, [user?.role, user?.id]);
@@ -491,12 +513,12 @@ function ChatPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Cozy image and chat area container */}
-      <div className="w-full max-w-5xl px-2 mx-auto sm:px-4">
+      <div className="px-2 mx-auto w-full max-w-5xl sm:px-4">
         {/* Cozy image at the top */}
         <img
           src="/study.png"
           alt="Cozy study"
-          className="object-cover w-full h-40 mt-4 mb-4 sm:h-56 rounded-2xl sm:mt-8 sm:mb-6"
+          className="object-cover mt-4 mb-4 w-full h-40 rounded-2xl sm:h-56 sm:mt-8 sm:mb-6"
           style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)' }}
         />
         {/* Header */}
@@ -524,7 +546,7 @@ function ChatPage() {
            )}
          </div>
         {/* Chat area */}
-        <div className="flex flex-col flex-1 w-full pt-2 space-y-4 sm:pt-4 pb-28 sm:pb-32 sm:space-y-6">
+        <div className="flex flex-col flex-1 pt-2 pb-28 space-y-4 w-full sm:pt-4 sm:pb-32 sm:space-y-6">
           {messageList.map((msg, idx) => (
             <div
               key={idx}
@@ -615,17 +637,17 @@ function ChatPage() {
       </div>
       {/* Input bar */}
       {/* Disclaimer */}
-      <div className="fixed bottom-16 sm:bottom-20 left-0 right-0 z-5 px-4 sm:px-6">
-        <div className="max-w-lg mx-auto sm:max-w-2xl">
-          <div className="rounded-lg p-3 text-center shadow-sm">
-            <p className="text-xs sm:text-sm mb-2">
+      <div className="fixed right-0 left-0 bottom-16 px-4 sm:bottom-20 z-5 sm:px-6">
+        <div className="mx-auto max-w-lg sm:max-w-2xl">
+          <div className="p-3 text-center rounded-lg shadow-sm">
+            <p className="mb-2 text-xs sm:text-sm">
               ⚠️ Please end the chat before closing the tab or browser
             </p>
           </div>
         </div>
       </div>
-      <div className="fixed bottom-0 left-0 z-10 flex justify-center w-full px-2 pb-4 bg-white border-t border-gray-200 sm:pb-8 sm:px-0 sm:border-t-0">
-        <div className="flex items-center w-full max-w-lg px-2 py-2 bg-gray-100 shadow-md sm:max-w-2xl rounded-2xl sm:px-4 sm:py-3">
+      <div className="flex fixed bottom-0 left-0 z-10 justify-center px-2 pb-4 w-full bg-white border-t border-gray-200 sm:pb-8 sm:px-0 sm:border-t-0">
+        <div className="flex items-center px-2 py-2 w-full max-w-lg bg-gray-100 rounded-2xl shadow-md sm:max-w-2xl sm:px-4 sm:py-3">
           <input
             type="text"
             className="flex-1 bg-transparent outline-none border-none text-base px-1.5 sm:px-2 py-2 placeholder-gray-400 min-w-0"
@@ -638,7 +660,7 @@ function ChatPage() {
             onKeyDown={e => e.key === 'Enter' && sendMessage()}
             style={{ fontSize: '1rem' }}
           />
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex flex-shrink-0 gap-2 items-center">
             <button
               className="px-2 py-1 text-xs font-medium text-red-600 bg-red-100 rounded hover:bg-red-200 sm:px-3 sm:text-sm"
               onClick={report}
@@ -661,7 +683,7 @@ function ChatPage() {
               End
             </button>
             <button
-              className="px-3 py-1 text-xs font-semibold text-gray-700 transition bg-blue-100 rounded hover:bg-blue-200 sm:px-4 sm:text-sm"
+              className="px-3 py-1 text-xs font-semibold text-gray-700 bg-blue-100 rounded transition hover:bg-blue-200 sm:px-4 sm:text-sm"
               onClick={sendMessage}
             >
               Send

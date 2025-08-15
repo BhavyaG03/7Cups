@@ -181,9 +181,27 @@ const initSocket = (server) => {
       console.log("User disconnected:", socket.id);
       // Set connection status to false, clear room_id, and update lastSeen
       // Intent status only changes on explicit user actions
-      if (socket.userId) {
+      let userId = socket.userId;
+      let userRole = null;
+      let roomsToProcess = [];
+      
+      if (userId) {
         try {
-          await User.findByIdAndUpdate(socket.userId, { 
+          // Get user info before updating
+          const user = await User.findById(userId);
+          if (user) {
+            userRole = user.role;
+            if (user.room_id) {
+              roomsToProcess.push({
+                room_id: user.room_id,
+                user_id: userRole === 'user' ? userId : null,
+                listener_id: userRole === 'listener' ? userId : null
+              });
+            }
+          }
+          
+          // Update user status
+          await User.findByIdAndUpdate(userId, { 
             isConnected: false, 
             room_id: null, 
             lastSeen: new Date() 
@@ -192,18 +210,49 @@ const initSocket = (server) => {
           console.error("Error updating connection status:", err);
         }
       }
+      
+      // Process all rooms the user was in
       for (let room in usersInRoom) {
         if (usersInRoom[room].includes(socket.id)) {
           usersInRoom[room] = usersInRoom[room].filter((id) => id !== socket.id);
 
           // Emit user left event to the specific room
           io.to(room).emit("user_left", { userId: socket.id });
+          
+          // If we didn't already add this room from user.room_id, try to find room info
+          if (!roomsToProcess.some(r => r.room_id === room)) {
+            try {
+              // Try to get room info from database
+              const roomData = await require('../models/Room').findOne({ room_id: room });
+              if (roomData) {
+                roomsToProcess.push({
+                  room_id: room,
+                  user_id: roomData.user_id,
+                  listener_id: roomData.listener_id
+                });
+              }
+            } catch (err) {
+              console.error("Error getting room data:", err);
+            }
+          }
 
           // If room is empty, delete it
           if (usersInRoom[room].length === 0) {
             delete usersInRoom[room];
           }
         }
+      }
+      
+      // For each room the user was in, emit userDisconnected event with room info
+      for (const roomInfo of roomsToProcess) {
+        console.log(`Emitting userDisconnected for room: ${roomInfo.room_id}`);
+        io.to(roomInfo.room_id).emit("userDisconnected", {
+          room_id: roomInfo.room_id,
+          user_id: roomInfo.user_id,
+          listener_id: roomInfo.listener_id,
+          disconnected_user_id: userId,
+          disconnected_user_role: userRole
+        });
       }
     });
   });
