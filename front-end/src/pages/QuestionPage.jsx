@@ -39,11 +39,21 @@ function formatLastSeen(dateString) {
 
 function QuestionPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [responses, setResponses] = useState({});
+  const [responses, setResponses] = useState(() => {
+    // Try to get saved responses from sessionStorage
+    const savedResponses = sessionStorage.getItem("questionResponses");
+    return savedResponses ? JSON.parse(savedResponses) : {};
+  });
   const [selectedOptions, setSelectedOptions] = useState([]);
-  const [showListeners, setShowListeners] = useState(false);
+  const [showListeners, setShowListeners] = useState(() => {
+    // Check if we were already showing listeners before reload
+    return sessionStorage.getItem("showingListeners") === "true";
+  });
   const [listeners, setListeners] = useState([]);
-  const [additionalMessage, setAdditionalMessage] = useState("");
+  const [additionalMessage, setAdditionalMessage] = useState(() => {
+    // Try to get saved additional message from sessionStorage
+    return sessionStorage.getItem("additionalMessage") || "";
+  });
   // Replace useSelector with sessionStorage
   const user = (() => {
     const stored = sessionStorage.getItem('user');
@@ -92,10 +102,31 @@ function QuestionPage() {
   const navigate = useNavigate();
   const progressBarWidth = ((currentQuestion + 1) / questions.length) * 100;
   useEffect(() => {
+    // If we're showing listeners (either from state or restored from sessionStorage)
     if (showListeners) {
       fetchListeners();
     }
-  }, [showListeners]); 
+    
+    // Restore current question position based on saved responses
+    const savedResponses = sessionStorage.getItem("questionResponses");
+    if (savedResponses) {
+      const parsedResponses = JSON.parse(savedResponses);
+      const answeredQuestions = Object.keys(parsedResponses).length;
+      
+      // If user has answered some questions but not all, set current question accordingly
+      if (answeredQuestions > 0 && answeredQuestions < questions.length && !showListeners) {
+        // Find the index of the next unanswered question
+        let nextQuestionIndex = 0;
+        for (let i = 0; i < questions.length; i++) {
+          if (!parsedResponses[questions[i].key]) {
+            nextQuestionIndex = i;
+            break;
+          }
+        }
+        setCurrentQuestion(nextQuestionIndex);
+      }
+    }
+  }, []); 
 
   const handleOptionClick = (option) => {
     const currentQ = questions[currentQuestion];
@@ -118,6 +149,9 @@ function QuestionPage() {
 
     setResponses((prevResponses) => {
       const updatedResponses = { ...prevResponses, [currentQ.key]: answer };
+      
+      // Save responses to sessionStorage
+      sessionStorage.setItem("questionResponses", JSON.stringify(updatedResponses));
 
       if (currentQuestion === questions.length - 1) {
         storeResponses(updatedResponses);
@@ -145,6 +179,8 @@ function QuestionPage() {
 
       await axios.post(`${import.meta.env.VITE_API_URL}/api/responses`, payload);
       setShowListeners(true);
+      // Save that we're showing listeners now
+      sessionStorage.setItem("showingListeners", "true");
     } catch (error) {
       console.error("Error storing responses:", error);
     }
@@ -157,6 +193,8 @@ function QuestionPage() {
       );
       setListeners(response.data);
       setShowListeners(true);
+      // Save that we're showing listeners now
+      sessionStorage.setItem("showingListeners", "true");
       // Fetch status for each listener
       const statuses = {};
       await Promise.all(response.data.map(async (listener) => {
@@ -180,6 +218,12 @@ function QuestionPage() {
       await axios.put(`${import.meta.env.VITE_API_URL}/api/chats/${listenerRoomId}`, {
         user_id: id,
       });
+
+      // Clear saved responses when joining chat
+      // This ensures a fresh start when user returns to questions page
+      sessionStorage.removeItem("questionResponses");
+      sessionStorage.removeItem("showingListeners");
+      sessionStorage.removeItem("additionalMessage");
 
       navigate(`/chat`, { state: { room_id: listenerRoomId, listenerId: listenerId, userId: id } });
     } catch (error) {
@@ -241,7 +285,11 @@ function QuestionPage() {
                     className="w-full p-4 border border-gray-300 rounded-xl min-h-[100px] text-sm sm:text-base mb-2"
                     placeholder="Type your thoughts here..."
                     value={additionalMessage}
-                    onChange={(e) => setAdditionalMessage(e.target.value)}
+                    onChange={(e) => {
+                      setAdditionalMessage(e.target.value);
+                      // Save additional message to sessionStorage
+                      sessionStorage.setItem("additionalMessage", e.target.value);
+                    }}
                   />
                   <button
                     className="px-4 py-3 font-bold text-white bg-blue-500 rounded-xl hover:bg-blue-700 focus:outline-none w-full mt-2 text-sm sm:text-base"
