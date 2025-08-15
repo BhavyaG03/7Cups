@@ -10,6 +10,8 @@ function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showVerificationMessage, setShowVerificationMessage] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -18,6 +20,14 @@ function LoginPage() {
     setLoading(true);
     try {
       const res = await axios.post(`${apiUrl}/api/users/login`, { email, password });
+
+      // Check if user needs email verification
+      if (res.data.requiresVerification) {
+        setUnverifiedEmail(res.data.email);
+        setShowVerificationMessage(true);
+        setLoading(false);
+        return;
+      }
 
       // Save user and token to sessionStorage for per-tab persistence
       sessionStorage.setItem('user', JSON.stringify(res.data.user));
@@ -47,6 +57,49 @@ function LoginPage() {
     }
   };
 
+  const handleResendVerification = () => {
+    navigate("/resend-verification");
+  };
+
+  const handleBackToLogin = () => {
+    setShowVerificationMessage(false);
+    setUnverifiedEmail('');
+  };
+
+  if (showVerificationMessage) {
+    return (
+      <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="bg-white min-h-screen">
+        <Header />
+        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] bg-white sm:bg-gray-50 px-4">
+          <div className="w-full max-w-md sm:max-w-xl bg-white rounded-2xl sm:shadow-md px-4 py-8 sm:px-8 sm:py-10 text-center">
+            <div className="text-yellow-500 text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold mb-4">Email Not Verified</h2>
+            <p className="text-gray-600 mb-6">
+              Please verify your email address before logging in.
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              We sent a verification link to <strong>{unverifiedEmail}</strong>
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={handleResendVerification}
+                className="w-full py-3 rounded-xl bg-[#18162B] text-white font-bold text-base transition-colors hover:bg-[#23204a] focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              >
+                Resend Verification Email
+              </button>
+              <button
+                onClick={handleBackToLogin}
+                className="w-full py-3 rounded-xl border border-[#18162B] text-[#18162B] font-bold text-base transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              >
+                Back to Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="bg-white min-h-screen">
       <Header />
@@ -69,6 +122,7 @@ function LoginPage() {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base placeholder:text-[#8B89A6]"
                 disabled={loading}
               />
@@ -82,6 +136,7 @@ function LoginPage() {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base placeholder:text-[#8B89A6]"
                 disabled={loading}
               />

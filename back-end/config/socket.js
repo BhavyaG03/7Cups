@@ -25,12 +25,17 @@ const initSocket = (server) => {
     console.log("User connected:", socket.id);
 
     // Expect user to send their userId after connecting
+    // Don't change status here - status only changes on explicit user actions
     socket.on("user_online", async (userId) => {
       socket.userId = userId;
       try {
-        await User.findByIdAndUpdate(userId, { status: "online", lastSeen: null });
+        // Set connection status to true and update lastSeen, keep existing intent status
+        await User.findByIdAndUpdate(userId, { 
+          isConnected: true, 
+          lastSeen: null 
+        });
       } catch (err) {
-        console.error("Error setting user online:", err);
+        console.error("Error updating connection status:", err);
       }
     });
 
@@ -105,6 +110,12 @@ const initSocket = (server) => {
       try {
         await messageStorage.storeMessage(msgData.room, msgData);
         io.to(msgData.room).emit("receive_message", msgData);
+        
+        // Change status to 'busy' on first message (chat has started)
+        if (socket.userId) {
+          await User.findByIdAndUpdate(socket.userId, { status: "busy" });
+        }
+        
         const endTime = Date.now();
         console.log(`[PERF] Message sent in ${endTime - startTime}ms`);
       } catch (error) {
@@ -136,6 +147,24 @@ const initSocket = (server) => {
       console.log(`Chat ended in room: ${room_id}`);
       io.to(room_id).emit("chatEnded", { room_id, listener_id, user_id, user_role });
 
+      // Reset both users to offline when chat ends
+      try {
+        if (listener_id) {
+          await User.findByIdAndUpdate(listener_id, { 
+            status: "offline", 
+            room_id: null 
+          });
+        }
+        if (user_id) {
+          await User.findByIdAndUpdate(user_id, { 
+            status: "offline", 
+            room_id: null 
+          });
+        }
+      } catch (error) {
+        console.error("Error resetting user statuses:", error);
+      }
+
       // Clear messages from Redis when chat ends
       try {
         await messageStorage.clearMessages(room_id);
@@ -150,12 +179,17 @@ const initSocket = (server) => {
     // ✅ Handle user disconnection and remove them from rooms
     socket.on("disconnect", async () => {
       console.log("User disconnected:", socket.id);
-      // Set user offline and update lastSeen, and clear room_id
+      // Set connection status to false, clear room_id, and update lastSeen
+      // Intent status only changes on explicit user actions
       if (socket.userId) {
         try {
-          await User.findByIdAndUpdate(socket.userId, { status: "offline", room_id: null, lastSeen: new Date() });
+          await User.findByIdAndUpdate(socket.userId, { 
+            isConnected: false, 
+            room_id: null, 
+            lastSeen: new Date() 
+          });
         } catch (err) {
-          console.error("Error setting user offline:", err);
+          console.error("Error updating connection status:", err);
         }
       }
       for (let room in usersInRoom) {

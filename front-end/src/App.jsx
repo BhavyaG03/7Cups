@@ -14,6 +14,8 @@ import ReportPage from './pages/ReportPage';
 import ReviewPage from './pages/ReviewPage';
 import SoSPage from './pages/SoSPage';
 import JournalPage from './pages/JournalPage';
+import EmailVerificationPage from './pages/EmailVerificationPage';
+import ResendVerificationPage from './pages/ResendVerificationPage';
 import { loginSuccess } from './redux/userSlice';
 
 
@@ -66,6 +68,8 @@ function App() {
       <Route path="/" element={<IndexPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify-email" element={<EmailVerificationPage />} />
+        <Route path="/resend-verification" element={<ResendVerificationPage />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/forum" element={<ForumPage />} />
         <Route path="/user/dashboard" element={<UserDashboard />} />

@@ -12,12 +12,16 @@ function RegisterPage() {
   const [role, setRole] = useState("user");
   const [gender, setGender] = useState("male");
   const [age, setAge] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleRegister = async (e) => {
     const apiUrl = import.meta.env.VITE_API_URL;
     e.preventDefault();
+    setIsLoading(true);
+    
     try {
       const res = await axios.post(`${apiUrl}/api/users/register`, {
         username,
@@ -28,16 +32,15 @@ function RegisterPage() {
         age,
       });
       
-      // If registration is successful, also log the user in
-      if (res.data.user) {
-        // Save user data to sessionStorage
+      if (res.data.requiresVerification) {
+        setVerificationSent(true);
+        // Don't automatically log in - user needs to verify email first
+      } else if (res.data.user) {
+        // This case shouldn't happen with the new flow, but keeping for safety
         sessionStorage.setItem('user', JSON.stringify(res.data.user));
         sessionStorage.setItem('token', res.data.token);
-        
-        // Update Redux state
         dispatch(loginSuccess(res.data.user));
         
-        // Navigate based on user role
         if (res.data.role === "listener") {
           navigate("/listener/dashboard");
         } else if (res.data.role === "user") {
@@ -45,15 +48,55 @@ function RegisterPage() {
         } else {
           navigate("/preview");
         }
-      } else {
-        navigate("/login");
       }
       
-      alert("Registered successfully");
+      alert(res.data.message);
     } catch (err) {
       alert(err.response?.data?.message || "Error registering");
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (verificationSent) {
+    return (
+      <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="bg-white min-h-screen">
+        <Header />
+        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] bg-white sm:bg-gray-50 px-4">
+          <div className="w-full max-w-md sm:max-w-xl bg-white rounded-2xl sm:shadow-md px-4 py-8 sm:px-8 sm:py-10 text-center">
+            <div className="text-blue-500 text-6xl mb-4">📧</div>
+            <h2 className="text-2xl font-bold mb-4">Check Your Email!</h2>
+            <p className="text-gray-600 mb-6">
+              We've sent a verification link to <strong>{email}</strong>
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              Please check your email and click the verification link to complete your registration.
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => setVerificationSent(false)}
+                className="w-full py-3 rounded-xl border border-[#18162B] text-[#18162B] font-bold text-base transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              >
+                Back to Registration
+              </button>
+              <Link
+                to="/resend-verification"
+                className="block w-full py-3 rounded-xl bg-[#18162B] text-white font-bold text-base transition-colors hover:bg-[#23204a] focus:outline-none focus:ring-2 focus:ring-indigo-200 text-center"
+              >
+                Resend Verification Email
+              </Link>
+              <Link
+                to="/login"
+                className="block text-[#8B89A6] underline text-sm"
+              >
+                Already have an account? Login
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="bg-white min-h-screen">
@@ -70,6 +113,7 @@ function RegisterPage() {
                 placeholder="Enter your username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                required
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base placeholder:text-[#8B89A6]"
               />
             </div>
@@ -81,6 +125,7 @@ function RegisterPage() {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base placeholder:text-[#8B89A6]"
               />
             </div>
@@ -92,6 +137,7 @@ function RegisterPage() {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base placeholder:text-[#8B89A6]"
               />
             </div>
@@ -101,6 +147,7 @@ function RegisterPage() {
               <select
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
+                required
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base text-gray-900"
               >
                 <option disabled>Select your gender</option>
@@ -117,6 +164,9 @@ function RegisterPage() {
                 placeholder="Enter your age"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
+                required
+                min="13"
+                max="120"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base placeholder:text-[#8B89A6]"
               />
             </div>
@@ -126,6 +176,7 @@ function RegisterPage() {
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
+                required
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base text-gray-900"
               >
                 <option disabled>Select your role</option>
@@ -136,9 +187,10 @@ function RegisterPage() {
             {/* Register Button */}
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-[#18162B] text-white font-bold text-base mt-5 transition-colors hover:bg-[#23204a] focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              disabled={isLoading}
+              className="w-full py-3 rounded-xl bg-[#18162B] text-white font-bold text-base mt-5 transition-colors hover:bg-[#23204a] focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Register
+              {isLoading ? "Creating Account..." : "Register"}
             </button>
           </form>
           {/* Login Redirect */}
