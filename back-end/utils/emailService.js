@@ -11,17 +11,23 @@ const createTransporter = () => {
   });
 };
 
-// Send verification email
-const sendVerificationEmail = async (email, verificationToken, username) => {
+// Send verification email with OTP
+const sendVerificationEmail = async (email, verificationOTP, username) => {
   try {
     const transporter = createTransporter();
     
-    const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
+    // Use absolute URL to ensure it works across different devices
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    // Make sure the URL is absolute (has protocol and domain)
+    const baseUrl = clientUrl.startsWith('http') ? clientUrl : `http://${clientUrl}`;
+    
+    // Direct link to verification page
+    const verificationUrl = `${baseUrl}/verify-email`;
     
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: 'Verify Your Email - Welcome to Our Platform!',
+      subject: 'Your Verification Code - Welcome to Our Platform!',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background-color: #18162B; color: white; padding: 20px; text-align: center;">
@@ -29,19 +35,24 @@ const sendVerificationEmail = async (email, verificationToken, username) => {
           </div>
           <div style="padding: 20px; background-color: #f9f9f9;">
             <h2>Hello ${username}!</h2>
-            <p>Thank you for registering with us. To complete your registration, please verify your email address by clicking the button below:</p>
+            <p>Thank you for registering with us. To complete your registration, please use the verification code below:</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <div style="background-color: #f0f0f0; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 32px; letter-spacing: 5px; font-weight: bold;">
+                ${verificationOTP}
+              </div>
+            </div>
+            
+            <p>Enter this 6-digit code on the verification page to verify your email address.</p>
             
             <div style="text-align: center; margin: 30px 0;">
               <a href="${verificationUrl}" 
                  style="background-color: #18162B; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
-                Verify Email Address
+                Go to Verification Page
               </a>
             </div>
             
-            <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
-            <p style="word-break: break-all; color: #666;">${verificationUrl}</p>
-            
-            <p>This verification link will expire in 24 hours.</p>
+            <p>This verification code will expire in 24 hours.</p>
             
             <p>If you didn't create an account, please ignore this email.</p>
             

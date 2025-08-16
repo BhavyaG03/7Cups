@@ -20,8 +20,8 @@ exports.register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Generate verification token
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    // Generate 6-digit OTP for email verification
+    const emailVerificationOTP = Math.floor(100000 + Math.random() * 900000).toString();
     const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
     const newUser = new User({
@@ -37,18 +37,18 @@ exports.register = async (req, res) => {
       total_ratings: total_ratings,
       lastSeen: null,
       isEmailVerified: false,
-      emailVerificationToken,
+      emailVerificationOTP,
       emailVerificationExpires
     });
 
     await newUser.save();
 
-    // Send verification email
-    const emailSent = await sendVerificationEmail(email, emailVerificationToken, username);
+    // Send verification email with OTP
+    const emailSent = await sendVerificationEmail(email, emailVerificationOTP, username);
     
     if (emailSent) {
       return res.status(201).json({ 
-        message: 'User registered successfully. Please check your email to verify your account.',
+        message: 'User registered successfully. Please check your email for the 6-digit verification code.',
         requiresVerification: true
       });
     } else {
@@ -67,24 +67,25 @@ exports.register = async (req, res) => {
 // VERIFY EMAIL
 exports.verifyEmail = async (req, res) => {
   try {
-    const { token } = req.body;
+    const { email, otp } = req.body;
 
-    if (!token) {
-      return res.status(400).json({ message: 'Verification token is required' });
+    if (!email || !otp) {
+      return res.status(400).json({ message: 'Email and verification code are required' });
     }
 
     const user = await User.findOne({
-      emailVerificationToken: token,
+      email,
+      emailVerificationOTP: otp,
       emailVerificationExpires: { $gt: Date.now() }
     });
 
     if (!user) {
-      return res.status(400).json({ message: 'Invalid or expired verification token' });
+      return res.status(400).json({ message: 'Invalid or expired verification code' });
     }
 
     // Mark email as verified and clear verification fields
     user.isEmailVerified = true;
-    user.emailVerificationToken = null;
+    user.emailVerificationOTP = null;
     user.emailVerificationExpires = null;
     user.status = 'online'; // Set user as online after verification
     await user.save();
@@ -101,7 +102,12 @@ exports.resendVerificationEmail = async (req, res) => {
   try {
     const { email } = req.body;
 
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
     const user = await User.findOne({ email });
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -110,21 +116,21 @@ exports.resendVerificationEmail = async (req, res) => {
       return res.status(400).json({ message: 'Email is already verified' });
     }
 
-    // Generate new verification token
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    // Generate new 6-digit OTP
+    const emailVerificationOTP = Math.floor(100000 + Math.random() * 900000).toString();
     const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    user.emailVerificationToken = emailVerificationToken;
+    user.emailVerificationOTP = emailVerificationOTP;
     user.emailVerificationExpires = emailVerificationExpires;
     await user.save();
 
-    // Send new verification email
-    const emailSent = await sendVerificationEmail(email, emailVerificationToken, user.username);
-    
+    // Send verification email with new OTP
+    const emailSent = await sendVerificationEmail(email, emailVerificationOTP, user.username);
+
     if (emailSent) {
-      return res.status(200).json({ message: 'Verification email sent successfully' });
+      return res.status(200).json({ message: 'Verification code sent successfully. Please check your email.' });
     } else {
-      return res.status(500).json({ message: 'Failed to send verification email' });
+      return res.status(500).json({ message: 'Failed to send verification email. Please try again later.' });
     }
   } catch (err) {
     console.error(err);
