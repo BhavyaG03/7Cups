@@ -60,16 +60,16 @@ function RegisterPage() {
 
   if (verificationSent) {
     return (
-      <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="bg-white min-h-screen">
+      <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="min-h-screen bg-white">
         <Header />
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] bg-white sm:bg-gray-50 px-4">
-          <div className="w-full max-w-md sm:max-w-xl bg-white rounded-2xl sm:shadow-md px-4 py-8 sm:px-8 sm:py-10 text-center">
-            <div className="text-blue-500 text-6xl mb-4">📧</div>
-            <h2 className="text-2xl font-bold mb-4">Check Your Email!</h2>
-            <p className="text-gray-600 mb-6">
+          <div className="px-4 py-8 w-full max-w-md text-center bg-white rounded-2xl sm:max-w-xl sm:shadow-md sm:px-8 sm:py-10">
+            <div className="mb-4 text-6xl text-blue-500">📧</div>
+            <h2 className="mb-4 text-2xl font-bold">Check Your Email!</h2>
+            <p className="mb-6 text-gray-600">
               We've sent a verification link to <strong>{email}</strong>
             </p>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="mb-6 text-sm text-gray-500">
               Please check your email and click the verification link to complete your registration.
             </p>
             <div className="space-y-3">
@@ -99,11 +99,11 @@ function RegisterPage() {
   }
 
   return (
-    <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="bg-white min-h-screen">
+    <div style={{ fontFamily: 'Epilogue, sans-serif' }} className="min-h-screen bg-white">
       <Header />
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] bg-white sm:bg-gray-50 px-4">
-        <div className="w-full max-w-md sm:max-w-xl bg-white rounded-2xl sm:shadow-md px-4 py-8 sm:px-8 sm:py-10">
-          <h2 className="text-center text-2xl font-bold mb-8">Register</h2>
+        <div className="px-4 py-8 w-full max-w-md bg-white rounded-2xl sm:max-w-xl sm:shadow-md sm:px-8 sm:py-10">
+          <h2 className="mb-8 text-2xl font-bold text-center">Register</h2>
           <form onSubmit={handleRegister} className="space-y-5">
             {/* Username */}
             <div>
@@ -148,7 +148,7 @@ function RegisterPage() {
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base text-gray-900"
+                className="px-4 py-3 w-full text-base text-gray-900 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200"
               >
                 <option disabled>Select your gender</option>
                 <option value="male">Male</option>
@@ -177,7 +177,7 @@ function RegisterPage() {
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base text-gray-900"
+                className="px-4 py-3 w-full text-base text-gray-900 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200"
               >
                 <option disabled>Select your role</option>
                 <option value="user">User</option>
@@ -197,8 +197,11 @@ function RegisterPage() {
           <p className="mt-6 text-center text-sm text-[#8B89A6]">
             Already have an account?
           </p>
-          <p className="text-center text-sm mb-2">
+          <p className="mb-2 text-sm text-center">
             <Link to="/login" className="text-[#8B89A6] underline">Login</Link>
+          </p>
+          <p className="mb-2 text-sm text-center">
+            <Link to="/resend-verification" className="text-[#8B89A6] underline">Registered but not verified ?</Link>
           </p>
           <p className="text-center text-xs text-[#8B89A6] mt-2">
             By registering, you agree to our Terms of Service and Privacy Policy.
