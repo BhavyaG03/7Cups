@@ -14,6 +14,8 @@ function RegisterPage() {
   const [age, setAge] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [verificationStatus, setVerificationStatus] = useState("idle");
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -57,6 +59,32 @@ function RegisterPage() {
       setIsLoading(false);
     }
   };
+  
+  const verifyEmailWithOTP = async (e) => {
+    e.preventDefault();
+    setVerificationStatus("verifying");
+    const apiUrl = import.meta.env.VITE_API_URL;
+    
+    try {
+      const res = await axios.post(`${apiUrl}/api/users/verify-email`, {
+        email,
+        otp
+      });
+      
+      // The backend returns a 200 status code on success, so we can just check if we got a response
+      setVerificationStatus("success");
+      // Store verification status in local storage
+      localStorage.setItem('emailVerified', 'true');
+      
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (err) {
+      setVerificationStatus("error");
+      alert(err.response?.data?.message || "Error verifying email");
+    }
+  };
 
   if (verificationSent) {
     return (
@@ -67,27 +95,61 @@ function RegisterPage() {
             <div className="mb-4 text-6xl text-blue-500">📧</div>
             <h2 className="mb-4 text-2xl font-bold">Check Your Email!</h2>
             <p className="mb-6 text-gray-600">
-              We've sent a verification link to <strong>{email}</strong>
+              We've sent a verification code to <strong>{email}</strong>
             </p>
-            <p className="mb-6 text-sm text-gray-500">
-              Please check your email and click the verification link to complete your registration.
-            </p>
+            
+            {verificationStatus === "error" && (
+              <div className="p-3 mb-4 text-red-700 bg-red-50 rounded-lg">
+                Invalid verification code. Please try again.
+              </div>
+            )}
+            
+            {verificationStatus === "success" ? (
+              <div className="p-3 mb-6 text-green-700 bg-green-50 rounded-lg">
+                Email verified successfully! Redirecting to login...
+              </div>
+            ) : (
+              <form onSubmit={verifyEmailWithOTP} className="mb-6">
+                <div className="mb-4">
+                  <label className="block text-left text-[16px] font-medium text-gray-900 mb-1">Enter 6-digit verification code</label>
+                  <input
+                    type="text"
+                    placeholder="Enter 6-digit code"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    required
+                    maxLength="6"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-base placeholder:text-[#8B89A6]"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={verificationStatus === "verifying"}
+                  className="w-full py-3 rounded-xl bg-[#18162B] text-white font-bold text-base transition-colors hover:bg-[#23204a] focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {verificationStatus === "verifying" ? (
+                    <span className="flex justify-center items-center">
+                      <svg className="mr-2 -ml-1 w-4 h-4 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Verifying...
+                    </span>
+                  ) : "Verify Email"}
+                </button>
+              </form>
+            )}
+            
             <div className="space-y-3">
-              <button
-                onClick={() => setVerificationSent(false)}
-                className="w-full py-3 rounded-xl border border-[#18162B] text-[#18162B] font-bold text-base transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-              >
-                Back to Registration
-              </button>
               <Link
                 to="/resend-verification"
-                className="block w-full py-3 rounded-xl bg-[#18162B] text-white font-bold text-base transition-colors hover:bg-[#23204a] focus:outline-none focus:ring-2 focus:ring-indigo-200 text-center"
+                className="block w-full py-3 rounded-xl border border-[#18162B] text-[#18162B] font-bold text-base transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200"
               >
                 Resend Verification Email
               </Link>
               <Link
                 to="/login"
-                className="block text-[#8B89A6] underline text-sm"
+                className="block text-[#8B89A6] underline text-sm mt-3"
               >
                 Already have an account? Login
               </Link>
