@@ -67,6 +67,7 @@ function ChatPage() {
   const [otherStatus, setOtherStatus] = useState({ status: '', lastSeen: '' });
   const [socketConnected, setSocketConnected] = useState(false);
   const [connectionQuality, setConnectionQuality] = useState('unknown');
+  const [speakerJoined, setSpeakerJoined] = useState(false);
   const socketRef = useRef(null);
   const hasJoinedRoom = useRef(false);
   // Use user?.id, user?.username, user?.role, etc. everywhere below
@@ -148,6 +149,10 @@ function ChatPage() {
           list.some((msg) => msg.time === data.time && msg.message === data.message) ? list : [...list, data]
         );
         setIsTyping(false);
+        // If we receive a message from a speaker and we're a listener, mark speaker as joined
+        if (role === 'listener' && data.side === 'right') {
+          setSpeakerJoined(true);
+        }
       };
       const handleLoadMessages = (messages) => {
         setMessageList(messages);
@@ -249,6 +254,9 @@ function ChatPage() {
         
         setMessageList(prev => [qnaMsgData, ...prev]);
         hasShownQnA.current = true;
+        
+        // Enable input for listener when Q&A is received
+        setSpeakerJoined(true);
       }
     } catch (error) {
       console.error("Error fetching speaker Q&A:", error);
@@ -343,31 +351,12 @@ function ChatPage() {
         navigate("/review", { state: { room_id, listener_id, user_id, user_role } });
       });
 
-      // Handle user disconnection (browser tab close, etc.)
-      socketRef.current.on("userDisconnected", async ({ room_id, listener_id, user_id, disconnected_user_role }) => {
-        console.log("User disconnected from chat:", { room_id, listener_id, user_id, disconnected_user_role });
-        alert(`Your ${disconnected_user_role || "chat partner"} has disconnected unexpectedly. You will be redirected to the review page.`);
-        
-        // If current user is the listener, set status to offline and clear room_id
-        if (user?.role === "listener") {
-          try {
-            await axios.put(`${import.meta.env.VITE_API_URL}/api/users/edit/${user.id}`, { 
-              status: "offline", 
-              room_id: null 
-            });
-          } catch (error) {
-            console.error("Error updating listener status:", error);
-          }
-        }
-        
-        sessionStorage.removeItem('room_id');
-        navigate("/review", { state: { room_id, listener_id, user_id, user_role: disconnected_user_role } });
-      });
+      // Removed userDisconnected event handler to prevent issues with page reloads
     }
     return () => {
       if (socketRef.current) {
         socketRef.current.off("chatEnded");
-        socketRef.current.off("userDisconnected");
+        // Also removed the corresponding off handler
       }
     };
   }, [user?.role, user?.id]);
@@ -640,9 +629,15 @@ function ChatPage() {
       <div className="fixed right-0 left-0 bottom-16 px-4 sm:bottom-20 z-5 sm:px-6">
         <div className="mx-auto max-w-lg sm:max-w-2xl">
           <div className="p-3 text-center rounded-lg shadow-sm">
-            <p className="mb-2 text-xs sm:text-sm">
-              ⚠️ Please end the chat before closing the tab or browser
-            </p>
+            {role === 'listener' && !speakerJoined ? (
+              <p className="mb-2 text-xs sm:text-sm text-blue-600">
+                ⏳ Waiting for speaker to join the chat. You'll be able to send messages once they arrive.
+              </p>
+            ) : (
+              <p className="mb-2 text-xs sm:text-sm">
+                ⚠️ Please end the chat before closing the tab or browser
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -651,7 +646,7 @@ function ChatPage() {
           <input
             type="text"
             className="flex-1 bg-transparent outline-none border-none text-base px-1.5 sm:px-2 py-2 placeholder-gray-400 min-w-0"
-            placeholder="Type a message"
+            placeholder={role === 'listener' && !speakerJoined ? "Waiting for speaker to join..." : "Type a message"}
             value={message}
             onChange={e => {
               setMessage(e.target.value);
@@ -659,6 +654,7 @@ function ChatPage() {
             }}
             onKeyDown={e => e.key === 'Enter' && sendMessage()}
             style={{ fontSize: '1rem' }}
+            disabled={role === 'listener' && !speakerJoined}
           />
           <div className="flex flex-shrink-0 gap-2 items-center">
             <button
@@ -683,8 +679,9 @@ function ChatPage() {
               End
             </button>
             <button
-              className="px-3 py-1 text-xs font-semibold text-gray-700 bg-blue-100 rounded transition hover:bg-blue-200 sm:px-4 sm:text-sm"
+              className={`px-3 py-1 text-xs font-semibold ${role === 'listener' && !speakerJoined ? 'text-gray-400 bg-gray-100' : 'text-gray-700 bg-blue-100 hover:bg-blue-200'} rounded transition sm:px-4 sm:text-sm`}
               onClick={sendMessage}
+              disabled={role === 'listener' && !speakerJoined}
             >
               Send
             </button>

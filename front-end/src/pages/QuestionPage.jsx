@@ -105,6 +105,14 @@ function QuestionPage() {
     // If we're showing listeners (either from state or restored from sessionStorage)
     if (showListeners) {
       fetchListeners();
+      
+      // Set up polling to refresh listeners list every 10 seconds
+      const intervalId = setInterval(() => {
+        fetchListeners();
+      }, 10000);
+      
+      // Clean up interval on component unmount
+      return () => clearInterval(intervalId);
     }
     
     // Restore current question position based on saved responses
@@ -126,7 +134,7 @@ function QuestionPage() {
         setCurrentQuestion(nextQuestionIndex);
       }
     }
-  }, []); 
+  }, [showListeners]); 
 
   const handleOptionClick = (option) => {
     const currentQ = questions[currentQuestion];

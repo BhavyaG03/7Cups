@@ -87,7 +87,7 @@ exports.verifyEmail = async (req, res) => {
     user.isEmailVerified = true;
     user.emailVerificationOTP = null;
     user.emailVerificationExpires = null;
-    user.status = 'online'; // Set user as online after verification
+    // Don't set status to online here - it should only be set when starting a session
     await user.save();
 
     return res.status(200).json({ message: 'Email verified successfully. You can now log in.' });
