@@ -313,6 +313,10 @@ function ChatPage() {
 
   // On chat end or logout, clear room_id from sessionStorage
   const endChat = async () => {
+    // Add confirmation prompt
+    const confirmEnd = window.confirm("Are you sure you want to end this chat?");
+    if (!confirmEnd) return;
+    
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/chats/${room}`);
       const { room_id, listener_id, user_id } = response.data;
@@ -362,6 +366,10 @@ function ChatPage() {
   }, [user?.role, user?.id]);
 
   const report = async () => {
+    // Add confirmation prompt
+    const confirmReport = window.confirm("Are you sure you want to report this user?");
+    if (!confirmReport) return;
+    
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/chats/${room}`);
       const { room_id, listener_id, user_id } = response.data;
