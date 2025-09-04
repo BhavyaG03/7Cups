@@ -522,25 +522,52 @@ function ChatPage() {
         <div className="pt-1 pb-1 text-2xl font-bold text-center sm:text-3xl sm:pt-2 sm:pb-2">
           {headerName}
         </div>
-                 <div className="mb-2 text-xs text-center text-gray-500">
-           {otherStatus.status === 'busy'
-             ? 'Busy'
-             : otherStatus.status === 'online'
-               ? 'Online'
-               : otherStatus.lastSeen
-                 ? `Last seen ${formatLastSeen(otherStatus.lastSeen)}`
-                 : 'Status unknown'}
-           {connectionQuality !== 'connected' && (
-             <span className={`ml-2 px-2 py-1 rounded text-xs ${
-               connectionQuality === 'error' ? 'bg-red-100 text-red-600' : 
-               connectionQuality === 'disconnected' ? 'bg-yellow-100 text-yellow-600' : 
-               'bg-gray-100 text-gray-600'
-             }`}>
-               {connectionQuality === 'error' ? 'Connection Error' : 
-                connectionQuality === 'disconnected' ? 'Disconnected' : 
-                'Connecting...'}
-             </span>
-           )}
+                 <div className="flex justify-between items-center p-3 mb-2 text-xs text-gray-500 bg-gray-100 rounded-md">
+           <div className="text-center">
+             {otherStatus.status === 'busy'
+               ? 'In chat'
+               : otherStatus.status === 'online'
+                 ? 'Online'
+                 : otherStatus.status === 'offline'
+                 ? 'Online'
+                 : otherStatus.lastSeen
+                   ? `Last seen ${formatLastSeen(otherStatus.lastSeen)}`
+                   : 'User disconnected'}
+             {connectionQuality !== 'connected' && (
+               <span className={`ml-2 px-2 py-1 rounded text-xs ${
+                 connectionQuality === 'error' ? 'bg-red-100 text-red-600' : 
+                 connectionQuality === 'disconnected' ? 'bg-yellow-100 text-yellow-600' : 
+                 'bg-gray-100 text-gray-600'
+               }`}>
+                 {connectionQuality === 'error' ? 'Connection Error' : 
+                  connectionQuality === 'disconnected' ? 'Disconnected' : 
+                  'Connecting...'}
+               </span>
+             )}
+           </div>
+           <div className="flex gap-2 items-center">
+             <button
+               className="px-2 py-1 text-xs font-medium text-red-600 bg-red-100 rounded hover:bg-red-200 sm:px-3 sm:text-sm"
+               onClick={report}
+               title="Report"
+             >
+               Report
+             </button>
+             <button
+               className={`px-2 py-1 text-xs font-medium text-red-600 bg-red-100 rounded hover:bg-red-200 sm:px-3 sm:text-sm ${role === 'listener' ? '' : 'hidden'}`}
+               onClick={sos}
+               title="SOS"
+             >
+               SOS
+             </button>
+             <button
+               className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded hover:bg-blue-200 sm:px-3 sm:text-sm"
+               onClick={endChat}
+               title="End Chat / Feedback"
+             >
+               End
+             </button>
+           </div>
          </div>
         {/* Chat area */}
         <div className="flex flex-col flex-1 pt-2 pb-28 space-y-4 w-full sm:pt-4 sm:pb-32 sm:space-y-6">
@@ -638,7 +665,7 @@ function ChatPage() {
         <div className="mx-auto max-w-lg sm:max-w-2xl">
           <div className="p-3 text-center rounded-lg shadow-sm">
             {role === 'listener' && !speakerJoined ? (
-              <p className="mb-2 text-xs sm:text-sm text-blue-600">
+              <p className="mb-2 text-xs text-blue-600 sm:text-sm">
                 ⏳ Waiting for speaker to join the chat. You'll be able to send messages once they arrive.
               </p>
             ) : (
@@ -664,28 +691,7 @@ function ChatPage() {
             style={{ fontSize: '1rem' }}
             disabled={role === 'listener' && !speakerJoined}
           />
-          <div className="flex flex-shrink-0 gap-2 items-center">
-            <button
-              className="px-2 py-1 text-xs font-medium text-red-600 bg-red-100 rounded hover:bg-red-200 sm:px-3 sm:text-sm"
-              onClick={report}
-              title="Report"
-            >
-              Report
-            </button>
-            <button
-              className={`px-2 py-1 text-xs font-medium text-red-600 bg-red-100 rounded hover:bg-red-200 sm:px-3 sm:text-sm ${role === 'listener' ? '' : 'hidden'}`}
-              onClick={sos}
-              title="SOS"
-            >
-              SOS
-            </button>
-            <button
-              className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded hover:bg-blue-200 sm:px-3 sm:text-sm"
-              onClick={endChat}
-              title="End Chat / Feedback"
-            >
-              End
-            </button>
+          <div className="flex flex-shrink-0 items-center">
             <button
               className={`px-3 py-1 text-xs font-semibold ${role === 'listener' && !speakerJoined ? 'text-gray-400 bg-gray-100' : 'text-gray-700 bg-blue-100 hover:bg-blue-200'} rounded transition sm:px-4 sm:text-sm`}
               onClick={sendMessage}
