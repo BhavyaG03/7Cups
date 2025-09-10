@@ -69,15 +69,13 @@ function QuestionPage() {
       key: "feelings",
       question: "How do you feel right now? (Select all that apply)",
       options: [
-        "I feel restless or constantly on edge.",
-        "I struggle to focus or make decisions.",
-        "My sleep has been disturbed lately.",
-        "I often feel low on energy or exhausted.",
-        "I feel guilty, hopeless, or unmotivated.",
-        "My heart races, or I feel physically uneasy in certain situations.",
-        "I feel disconnected or alone, even around others.",
-        "I am struggling with my relationships.",
-        "I feel overwhelmed by family expectations or conflicts.",
+        "Worried about my future/career",
+        "Stressed with studies/workload",
+        "Anxious in social situations or friendships",
+        "Stressed by family expectations",
+        "Struggling with relationships or feeling lonely",
+        "Not feeling confident about myself",
+
       ],
       multiple: true,
     },
@@ -90,11 +88,10 @@ function QuestionPage() {
       key: "conversation_goal",
       question: "What do you hope to get out of this conversation?",
       options: [
-        "I just want to vent and express my thoughts.",
-        "I want someone to listen and understand me.",
-        "I need help making sense of my emotions.",
-        "I want to feel less alone in what I am going through.",
-        "I don't know, I just need to talk.",
+        "I just want to vent and express myself", 
+        "I want to feel heard and not alone", 
+        "I'm not sure, I just need to talk",
+
       ],
     },
   ];
