@@ -2,6 +2,19 @@ const nodemailer = require('nodemailer');
 
 // Create transporter for sending emails
 const createTransporter = () => {
+  // Validate environment variables
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    console.error('❌ Email configuration missing:');
+    console.error('EMAIL_USER:', process.env.EMAIL_USER ? '✅ Set' : '❌ Missing');
+    console.error('EMAIL_PASSWORD:', process.env.EMAIL_PASSWORD ? '✅ Set' : '❌ Missing');
+    throw new Error('Email configuration is incomplete. Check environment variables.');
+  }
+
+  console.log('📧 Creating email transporter with:', {
+    user: process.env.EMAIL_USER,
+    passwordLength: process.env.EMAIL_PASSWORD?.length || 0
+  });
+
   return nodemailer.createTransport({
     service: 'gmail', // You can change this to other services like 'outlook', 'yahoo', etc.
     auth: {
@@ -63,10 +76,23 @@ const sendVerificationEmail = async (email, verificationOTP, username) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Verification email sent:', info.messageId);
+    console.log('✅ Verification email sent successfully:', info.messageId);
     return true;
   } catch (error) {
-    console.error('Error sending verification email:', error);
+    console.error('❌ Error sending verification email:', {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response
+    });
+    
+    // Check for specific Gmail authentication errors
+    if (error.code === 'EAUTH') {
+      console.error('🔐 Gmail authentication failed. Check your app password.');
+    } else if (error.code === 'ECONNECTION') {
+      console.error('🌐 Connection failed. Check your internet connection.');
+    }
+    
     return false;
   }
 };
