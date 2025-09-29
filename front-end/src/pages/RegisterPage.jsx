@@ -50,6 +50,12 @@ function RegisterPage() {
         } else {
           navigate("/preview");
         }
+      } else {
+        // Registration successful but no auto-login (email verification disabled)
+        // Show success message and redirect to login
+        alert(res.data.message);
+        navigate("/login");
+        return; // Exit early to avoid showing alert twice
       }
       
       alert(res.data.message);

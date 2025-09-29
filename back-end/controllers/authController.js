@@ -43,6 +43,22 @@ exports.register = async (req, res) => {
 
     await newUser.save();
 
+    // TEMPORARILY DISABLED: Email verification
+    // Mark email as verified automatically for now
+    newUser.isEmailVerified = true;
+    newUser.emailVerificationOTP = null;
+    newUser.emailVerificationExpires = null;
+    await newUser.save();
+
+    console.log('✅ User registered successfully (email verification disabled)');
+    
+    return res.status(201).json({ 
+      message: 'User registered successfully. You can now log in.',
+      requiresVerification: false
+    });
+
+    // COMMENTED OUT: Email verification code
+    /*
     // Send verification email with OTP
     const emailSent = await sendVerificationEmail(email, emailVerificationOTP, username);
     
@@ -58,6 +74,7 @@ exports.register = async (req, res) => {
         requiresVerification: true
       });
     }
+    */
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });
@@ -153,6 +170,8 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+    // TEMPORARILY DISABLED: Email verification check
+    /*
     // Check if email is verified
     if (!user.isEmailVerified) {
       return res.status(401).json({ 
@@ -161,6 +180,7 @@ exports.login = async (req, res) => {
         email: user.email
       });
     }
+    */
 
     // Don't change status on login - keep existing status
     // Status will only change when user explicitly starts session or sends messages
